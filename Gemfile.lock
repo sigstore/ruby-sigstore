@@ -1,0 +1,59 @@
+PATH
+  remote: .
+  specs:
+    ruby-sigstore (0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    diff-lcs (1.4.4)
+    hashie (4.1.0)
+    oa-core (0.0.5)
+      rack (~> 1.1)
+    oa-openid (0.0.2)
+      oa-core (~> 0.0.0)
+      rack-openid
+    omniauth (2.0.3)
+      hashie (>= 3.4.6)
+      rack (>= 1.6.2, < 3)
+      rack-protection
+    omniauth-openid (2.0.1)
+      omniauth (>= 1.0, < 3.0)
+      rack-openid (~> 1.4.0)
+    rack (1.6.13)
+    rack-openid (1.4.2)
+      rack (>= 1.1.0)
+      ruby-openid (>= 2.1.8)
+    rack-protection (2.1.0)
+      rack
+    rake (12.3.3)
+    rspec (3.10.0)
+      rspec-core (~> 3.10.0)
+      rspec-expectations (~> 3.10.0)
+      rspec-mocks (~> 3.10.0)
+    rspec-core (3.10.1)
+      rspec-support (~> 3.10.0)
+    rspec-expectations (3.10.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.10.0)
+    rspec-mocks (3.10.2)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.10.0)
+    rspec-support (3.10.2)
+    ruby-openid (2.9.2)
+    ruby-openid-apps-discovery (1.2.0)
+      ruby-openid (>= 2.1.7)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  oa-openid
+  omniauth-openid
+  rake (~> 12.0)
+  rspec (~> 3.0)
+  ruby-openid-apps-discovery
+  ruby-sigstore!
+
+BUNDLED WITH
+   2.2.3

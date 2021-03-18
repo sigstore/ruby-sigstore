@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["lhinds@redhat.com"]
 
   spec.summary       = %q{Sigstore signing client.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
+  spec.description   = %q{Sigstore}
   spec.homepage      = "https://github.com/sigstore/ruby-sigstore"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
