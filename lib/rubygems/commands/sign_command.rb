@@ -1,5 +1,6 @@
 require 'rubygems/command'
 
+require "launchy"
 require "openid_connect"
 
 class Gem::Commands::SignCommand < Gem::Command
@@ -50,8 +51,7 @@ class Gem::Commands::SignCommand < Gem::Command
     )
     puts authorization_uri
     
-    # NOTE: this do not work across OS
-    `xdg-open "#{authorization_uri}"`
+    Launchy.open(authorization_uri)
   end
 
   private
