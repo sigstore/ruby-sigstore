@@ -29,4 +29,5 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "pp", "0.2.0"
   spec.add_runtime_dependency "openid_connect", "~> 1.2", ">= 1.2.0"
+  spec.add_runtime_dependency "launchy", "~> 2.5"
 end
