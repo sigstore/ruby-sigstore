@@ -54,6 +54,9 @@ GEM
       validate_email
       validate_url
       webfinger (>= 1.0.1)
+    pp (0.2.0)
+      prettyprint
+    prettyprint (0.1.0)
     public_suffix (4.0.6)
     rack (2.2.3)
     rack-oauth2 (1.16.0)
@@ -108,6 +111,7 @@ PLATFORMS
 DEPENDENCIES
   oa-openid
   omniauth-openid
+  pp (= 0.2.0)
   rake (~> 12.0)
   rspec (~> 3.0)
   ruby-openid-apps-discovery
