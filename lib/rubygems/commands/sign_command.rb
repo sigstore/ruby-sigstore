@@ -51,7 +51,13 @@ class Gem::Commands::SignCommand < Gem::Command
     )
     puts authorization_uri
     
-    Launchy.open(authorization_uri)
+    begin
+      Launchy.open(authorization_uri)
+    rescue
+      # NOTE: ignore any exception, as the URL is printed above and may be
+      #       opened manually
+      puts "Cannot open browser automatically, please click on the link above"
+    end
   end
 
   private
