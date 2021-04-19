@@ -2,6 +2,7 @@ require 'rubygems/command'
 
 require "launchy"
 require "openid_connect"
+require "socket"
 
 class Gem::Commands::SignCommand < Gem::Command
   def initialize
@@ -24,9 +25,9 @@ class Gem::Commands::SignCommand < Gem::Command
   def execute
     puts "sign"
 
-    options[:issuer] = "https://accounts.google.com"
-    options[:client] = "237800849078-rmntmr1b2tcu20kpid66q5dbh1vdt7aj.apps.googleusercontent.com"
-    options[:secret] = "CkkuDoCgE2D_CCRRMyF_UIhS"
+    options[:issuer] = "https://oauth2.sigstore.dev/auth"
+    options[:client] = "sigstore"
+    options[:secret] = ""
 
     session = {}
     session[:state] = SecureRandom.hex(16)
@@ -58,6 +59,29 @@ class Gem::Commands::SignCommand < Gem::Command
       #       opened manually
       puts "Cannot open browser automatically, please click on the link above"
     end
+    server = TCPServer.new 5678
+    connection = server.accept
+    while (input = connection.gets)
+      response = "You may close this browser"
+
+      connection.print "HTTP/1.1 200 OK\r\n" +
+                  "Content-Type: text/plain\r\n" +
+                  "Content-Length: #{response.bytesize}\r\n" +
+                  "Connection: close\r\n"
+      connection.close
+      puts input
+      params = input.split('?')[1].split(' ')[0]     # chop off the verb / http version
+      paramarray  = params.split('&')    # only handles two parameters
+      code = paramarray[0].partition('=').last
+      scope = paramarray[1].partition('=').last
+      
+      break
+    end
+    client.authorization_code = code
+    access_token = client.access_token!
+    puts access_token
+    # next step is to grab scopes and send to fulcio as part of proof
+
   end
 
   private
