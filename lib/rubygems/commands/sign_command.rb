@@ -24,8 +24,6 @@ class Gem::Commands::SignCommand < Gem::Command
   end
 
   def execute
-    puts "sign"
-
     options[:issuer] = "https://oauth2.sigstore.dev/auth"
     options[:client] = "sigstore"
     options[:secret] = ""
@@ -80,7 +78,7 @@ class Gem::Commands::SignCommand < Gem::Command
     end
     client.authorization_code = code
     access_token = client.access_token!
-    puts access_token
+
     # next step is to grab scopes and send to fulcio as part of proof
     client = OpenIDConnect::Client.new(
       identifier: options[:client],
