@@ -1,4 +1,5 @@
 require 'rubygems/command'
+require "ruby/sigstore/crypto"
 
 require "launchy"
 require "openid_connect"
@@ -13,7 +14,7 @@ class Gem::Commands::SignCommand < Gem::Command
   def arguments # :nodoc:
     "GEMNAME        name of gem to sign"
   end
-  
+
   def defaults_str # :nodoc:
     ""
   end
@@ -23,6 +24,8 @@ class Gem::Commands::SignCommand < Gem::Command
   end
 
   def execute
+    priv, pub = Crypto.new().generate_keys
+
     options[:issuer] = "https://oauth2.sigstore.dev/auth"
     options[:client] = "sigstore"
     options[:secret] = ""
@@ -49,7 +52,7 @@ class Gem::Commands::SignCommand < Gem::Command
       nonce: session[:nonce]
     )
     puts authorization_uri
-    
+
     begin
       Launchy.open(authorization_uri)
     rescue
@@ -86,7 +89,7 @@ class Gem::Commands::SignCommand < Gem::Command
       client: userinfo_client
     )
     userinfo = scope_token.userinfo!
-    puts "Received email scope: " + userinfo.email 
+    puts "Received email scope: " + userinfo.email
   end
 
   private
