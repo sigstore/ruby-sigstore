@@ -1,5 +1,6 @@
 require 'rubygems/command'
 
+require 'json'
 require "launchy"
 require "openid_connect"
 require "socket"
@@ -34,12 +35,13 @@ class Gem::Commands::SignCommand < Gem::Command
     session[:nonce] = SecureRandom.hex(16)
 
     result = OpenIDConnect::Discovery::Provider::Config.discover! options[:issuer]
-    pp result
-    
+    # pp result
+    userinfo_endpoint = result.userinfo_endpoint
+    puts userinfo_endpoint
     client = OpenIDConnect::Client.new(
       authorization_endpoint: result.authorization_endpoint,
       identifier: options[:client],
-      redirect_uri: "http://localhost:5556/auth/callback",
+      redirect_uri: "http://localhost:5678",
       secret: options[:secret],
       token_endpoint: result.token_endpoint,
     )
@@ -73,15 +75,23 @@ class Gem::Commands::SignCommand < Gem::Command
       params = input.split('?')[1].split(' ')[0]     # chop off the verb / http version
       paramarray  = params.split('&')    # only handles two parameters
       code = paramarray[0].partition('=').last
-      scope = paramarray[1].partition('=').last
-      
+      state = paramarray[1].partition('=').last
       break
     end
     client.authorization_code = code
     access_token = client.access_token!
     puts access_token
     # next step is to grab scopes and send to fulcio as part of proof
-
+    client = OpenIDConnect::Client.new(
+      identifier: options[:client],
+      userinfo_endpoint: userinfo_endpoint
+    )
+    scope_token = OpenIDConnect::AccessToken.new(
+      access_token: access_token,
+      client: client
+    )
+    userinfo = scope_token.userinfo!
+    pp userinfo.email
   end
 
   private
