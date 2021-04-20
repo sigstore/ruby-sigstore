@@ -67,7 +67,6 @@ class Gem::Commands::SignCommand < Gem::Command
                   "Content-Length: #{response.bytesize}\r\n" +
                   "Connection: close\r\n"
       connection.close
-      puts input
       params = input.split('?')[1].split(' ')[0]     # chop off the verb / http version
       paramarray  = params.split('&')    # only handles two parameters
       code = paramarray[0].partition('=').last
@@ -78,16 +77,16 @@ class Gem::Commands::SignCommand < Gem::Command
     access_token = client.access_token!
 
     # next step is to grab scopes and send to fulcio as part of proof
-    client = OpenIDConnect::Client.new(
+    userinfo_client = OpenIDConnect::Client.new(
       identifier: options[:client],
       userinfo_endpoint: userinfo_endpoint
     )
     scope_token = OpenIDConnect::AccessToken.new(
       access_token: access_token,
-      client: client
+      client: userinfo_client
     )
     userinfo = scope_token.userinfo!
-    pp userinfo.email
+    puts "Received email scope: " + userinfo.email 
   end
 
   private
