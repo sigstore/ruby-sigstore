@@ -1,6 +1,5 @@
 require 'rubygems/command'
 
-require 'json'
 require "launchy"
 require "openid_connect"
 require "socket"
@@ -35,7 +34,6 @@ class Gem::Commands::SignCommand < Gem::Command
     result = OpenIDConnect::Discovery::Provider::Config.discover! options[:issuer]
     # pp result
     userinfo_endpoint = result.userinfo_endpoint
-    puts userinfo_endpoint
     client = OpenIDConnect::Client.new(
       authorization_endpoint: result.authorization_endpoint,
       identifier: options[:client],
