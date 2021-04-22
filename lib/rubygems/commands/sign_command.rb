@@ -1,7 +1,11 @@
 require 'rubygems/command'
+require "ruby/sigstore/crypto"
+require "ruby/sigstore/http_client"
 
+require 'json/jwt'
 require "launchy"
 require "openid_connect"
+require "socket"
 
 class Gem::Commands::SignCommand < Gem::Command
   def initialize
@@ -12,7 +16,7 @@ class Gem::Commands::SignCommand < Gem::Command
   def arguments # :nodoc:
     "GEMNAME        name of gem to sign"
   end
-  
+
   def defaults_str # :nodoc:
     ""
   end
@@ -22,42 +26,75 @@ class Gem::Commands::SignCommand < Gem::Command
   end
 
   def execute
-    puts "sign"
+    priv_key, pub_key = Crypto.new().generate_keys
 
-    options[:issuer] = "https://accounts.google.com"
-    options[:client] = "237800849078-rmntmr1b2tcu20kpid66q5dbh1vdt7aj.apps.googleusercontent.com"
-    options[:secret] = "CkkuDoCgE2D_CCRRMyF_UIhS"
+    options[:issuer] = "https://oauth2.sigstore.dev/auth"
+    options[:client] = "sigstore"
+    options[:secret] = ""
 
     session = {}
     session[:state] = SecureRandom.hex(16)
     session[:nonce] = SecureRandom.hex(16)
 
-    result = OpenIDConnect::Discovery::Provider::Config.discover! options[:issuer]
-    pp result
-    
+    oidc_discovery = OpenIDConnect::Discovery::Provider::Config.discover! options[:issuer]
+
     client = OpenIDConnect::Client.new(
-      authorization_endpoint: result.authorization_endpoint,
+      authorization_endpoint: oidc_discovery.authorization_endpoint,
       identifier: options[:client],
-      redirect_uri: "http://localhost:5556/auth/callback",
+      redirect_uri: "http://localhost:5678",
       secret: options[:secret],
-      token_endpoint: result.token_endpoint,
+      token_endpoint: oidc_discovery.token_endpoint,
     )
-    pp client
 
     authorization_uri = client.authorization_uri(
       scope: ["openid", :email],
       state: session[:state],
       nonce: session[:nonce]
     )
-    puts authorization_uri
-    
+
     begin
       Launchy.open(authorization_uri)
     rescue
       # NOTE: ignore any exception, as the URL is printed above and may be
       #       opened manually
-      puts "Cannot open browser automatically, please click on the link above"
+      puts "Cannot open browser automatically, please click on the link below:"
+      puts authorization_uri
     end
+
+    server = TCPServer.new 5678
+    connection = server.accept
+    while (input = connection.gets)
+      response = "You may close this browser"
+
+      connection.print "HTTP/1.1 200 OK\r\n" +
+                  "Content-Type: text/plain\r\n" +
+                  "Content-Length: #{response.bytesize}\r\n" +
+                  "Connection: close\r\n"
+      connection.close
+      params = input.split('?')[1].split(' ')[0]     # chop off the verb / http version
+      paramarray  = params.split('&')    # only handles two parameters
+      code = paramarray[0].partition('=').last
+      state = paramarray[1].partition('=').last
+      break
+    end
+
+    client.authorization_code = code
+    access_token = client.access_token!
+
+    jwks = JSON.parse(OpenIDConnect.http_client.get_content(oidc_discovery.jwks_uri)).with_indifferent_access
+    public_keys = JSON::JWK::Set.new jwks[:keys]
+
+    begin
+      decoded_access_token = JSON::JWT.decode(access_token.to_s,public_keys)
+    rescue JSON::JWS::VerificationFailed => e
+      abort 'JWT Verification Failed: ' + e.to_s
+    else  #success
+      decode_json = JSON.parse(decoded_access_token.to_json)
+    end
+
+    proof = Crypto.new().sign_proof(priv_key, decode_json["email"])
+    cert_response = HttpClient.new().get_cert(access_token, proof, pub_key, options[:host])
+    puts cert_response
   end
 
   private

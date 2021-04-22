@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     ruby-sigstore (0.1.0)
-      launchy
+      launchy (~> 2.5)
       openid_connect (~> 1.2, >= 1.2.0)
 
 GEM
