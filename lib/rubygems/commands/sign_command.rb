@@ -1,6 +1,6 @@
 require 'rubygems/command'
-require "ruby/sigstore/crypto"
-require "ruby/sigstore/http_client"
+require "rubygems/sigstore/crypto"
+require "rubygems/sigstore/http_client"
 
 require 'json/jwt'
 require "launchy"
