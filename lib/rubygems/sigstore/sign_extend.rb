@@ -13,12 +13,27 @@
 # limitations under the License.
 
 require 'rubygems/command_manager'
-require 'rubygems/sigstore/sign_extend'
-require 'rubygems/sigstore/verify_extend'
+require "rubygems/sigstore/config"
+require 'rubygems/sigstore/options'
 
 Gem::CommandManager.instance.register_command :sign
-Gem::CommandManager.instance.register_command :verify
 
-[:sign, :verify, :build, :install].each do |cmd_name|
-    cmd = Gem::CommandManager.instance[cmd_name]
+# overde the generic gem build command to lay are own --sign option on top
+b = Gem::CommandManager.instance[:build]
+b.add_option("--sign", "Sign gem with sigstore.") do |value, options|
+  Gem::Sigstore.options[:sign] = true
+end
+
+class Gem::Commands::BuildCommand
+  alias_method :original_execute, :execute
+  def execute
+    
+    config = SigStoreConfig.new().config
+    
+    if Gem::Sigstore.options[:sign]
+        puts "sign called"
+    end
+    # original_execute calls the native command
+    original_execute
+  end
 end

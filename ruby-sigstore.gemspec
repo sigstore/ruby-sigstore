@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative "lib/ruby/sigstore/version"
+require_relative "lib/rubygems/sigstore/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "ruby-sigstore"
@@ -43,5 +43,11 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "pp", "0.2.0"
   spec.add_runtime_dependency "openid_connect", "~> 1.2", ">= 1.2.0"
+  spec.add_runtime_dependency "oa-openid", "~> 0.0.2"
+  spec.add_runtime_dependency "omniauth-openid", "~> 2.0.1"
+  spec.add_runtime_dependency "ruby-openid-apps-discovery", "~> 1.2.0"
   spec.add_runtime_dependency "launchy", "~> 2.5"
+  spec.add_runtime_dependency "faraday_middleware", "~> 1.0.0"
+  spec.add_runtime_dependency "config", "~> 3.1.0"
+  spec.add_runtime_dependency "json-jwt", "~> 1.13.0"
 end
