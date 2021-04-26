@@ -52,10 +52,12 @@ class Gem::Commands::SignCommand < Gem::Command
 
     oidc_discovery = OpenIDConnect::Discovery::Provider::Config.discover! options[:issuer]
 
+    server = TCPServer.new 0
+
     client = OpenIDConnect::Client.new(
       authorization_endpoint: oidc_discovery.authorization_endpoint,
       identifier: options[:client],
-      redirect_uri: "http://localhost:5678",
+      redirect_uri: "http://localhost:" + server.addr[1],
       secret: options[:secret],
       token_endpoint: oidc_discovery.token_endpoint,
     )
@@ -75,7 +77,6 @@ class Gem::Commands::SignCommand < Gem::Command
       puts authorization_uri
     end
 
-    server = TCPServer.new 5678
     connection = server.accept
     while (input = connection.gets)
       response = "You may close this browser"
