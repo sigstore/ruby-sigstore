@@ -46,7 +46,6 @@ class Gem::Commands::SignCommand < Gem::Command
     session = {}
     session[:state] = SecureRandom.hex(16)
     session[:nonce] = SecureRandom.hex(16)
-
     oidc_discovery = OpenIDConnect::Discovery::Provider::Config.discover! config.oidc_issuer
 
     server = TCPServer.new 0
@@ -72,15 +71,9 @@ class Gem::Commands::SignCommand < Gem::Command
 
     client = OpenIDConnect::Client.new(
       authorization_endpoint: oidc_discovery.authorization_endpoint,
-<<<<<<< HEAD
       identifier: config.oidc_client,
-      redirect_uri: "http://localhost:5678",
-      secret: config.oidc_secret,
-=======
-      identifier: options[:client],
       redirect_uri: "http://localhost:" + server.addr[1].to_s,
-      secret: options[:secret],
->>>>>>> upstream/main
+      secret: config.oidc_secret,
       token_endpoint: oidc_discovery.token_endpoint,
     )
 
