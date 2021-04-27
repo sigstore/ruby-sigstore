@@ -58,6 +58,8 @@ class Gem::Commands::SignCommand < Gem::Command
                     "Content-Type: text/plain\r\n" +
                     "Content-Length: #{response.bytesize}\r\n" +
                     "Connection: close\r\n"
+        connection.print "\r\n"
+        connection.print response
         connection.close
         params = input.split('?')[1].split(' ')[0]     # chop off the verb / http version
         paramarray  = params.split('&')    # only handles two parameters

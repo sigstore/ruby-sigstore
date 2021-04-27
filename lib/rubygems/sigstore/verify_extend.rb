@@ -20,21 +20,15 @@ Gem::CommandManager.instance.register_command :verify
 
 # gem install hooks
 i = Gem::CommandManager.instance[:install]
-i.add_option("--verify",
+i.add_option("--[no-]verify",
              'Verifies a local gem has been signed via sigstore.' +
              'This helps to ensure the gem has not been tampered with in transit.') do |value, options|
-  Gem::Sigstore.options[:verify] = true
-end
-
-i.add_option("--no-verify",
-             "Don't verify a gem") do |value, options|
-  Gem::Sigstore.options[:no_verify] = true
+  Gem::Sigstore.options[:verify] = value
 end
 
 Gem.pre_install do |installer|
   begin
-    # --no-verify overrides --verify
-    if (Gem::Sigstore.options[:verify] && !Gem::Sigstore.options[:no_verify])
+    if (Gem::Sigstore.options[:verify])
       puts "verify called"
     end
   rescue Gem::SigstoreException => ex
