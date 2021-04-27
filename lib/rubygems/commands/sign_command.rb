@@ -52,10 +52,31 @@ class Gem::Commands::SignCommand < Gem::Command
 
     oidc_discovery = OpenIDConnect::Discovery::Provider::Config.discover! options[:issuer]
 
+    server = TCPServer.new 0
+    webserv = Thread.new do
+      connection = server.accept
+      while (input = connection.gets)
+        response = "You may close this browser"
+
+        connection.print "HTTP/1.1 200 OK\r\n" +
+                    "Content-Type: text/plain\r\n" +
+                    "Content-Length: #{response.bytesize}\r\n" +
+                    "Connection: close\r\n"
+        connection.close
+        params = input.split('?')[1].split(' ')[0]     # chop off the verb / http version
+        paramarray  = params.split('&')    # only handles two parameters
+        Thread.current[:code] = paramarray[0].partition('=').last
+        Thread.current[:state] = paramarray[1].partition('=').last
+        break
+      end
+    ensure
+      server.close
+    end
+
     client = OpenIDConnect::Client.new(
       authorization_endpoint: oidc_discovery.authorization_endpoint,
       identifier: options[:client],
-      redirect_uri: "http://localhost:5678",
+      redirect_uri: "http://localhost:" + server.addr[1].to_s,
       secret: options[:secret],
       token_endpoint: oidc_discovery.token_endpoint,
     )
@@ -75,24 +96,14 @@ class Gem::Commands::SignCommand < Gem::Command
       puts authorization_uri
     end
 
-    server = TCPServer.new 5678
-    connection = server.accept
-    while (input = connection.gets)
-      response = "You may close this browser"
+    webserv.join
 
-      connection.print "HTTP/1.1 200 OK\r\n" +
-                  "Content-Type: text/plain\r\n" +
-                  "Content-Length: #{response.bytesize}\r\n" +
-                  "Connection: close\r\n"
-      connection.close
-      params = input.split('?')[1].split(' ')[0]     # chop off the verb / http version
-      paramarray  = params.split('&')    # only handles two parameters
-      code = paramarray[0].partition('=').last
-      state = paramarray[1].partition('=').last
-      break
+    # check state == webserv[:state]
+    if webserv[:state] != session[:state]
+      abort 'Invalid state value received from OIDC Provider'
     end
 
-    client.authorization_code = code
+    client.authorization_code = webserv[:code]
     access_token = client.access_token!
 
     jwks = JSON.parse(OpenIDConnect.http_client.get_content(oidc_discovery.jwks_uri)).with_indifferent_access
