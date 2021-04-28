@@ -12,13 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'rubygems/command_manager'
-require 'rubygems/sigstore/sign_extend'
-require 'rubygems/sigstore/verify_extend'
-
-Gem::CommandManager.instance.register_command :sign
-Gem::CommandManager.instance.register_command :verify
-
-[:sign, :verify, :build, :install].each do |cmd_name|
-    cmd = Gem::CommandManager.instance[cmd_name]
+module Gem::Sigstore
+    private
+    def self.options
+      @options ||= {}
+      @options
+    end
 end

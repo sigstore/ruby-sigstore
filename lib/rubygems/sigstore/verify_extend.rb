@@ -13,12 +13,26 @@
 # limitations under the License.
 
 require 'rubygems/command_manager'
-require 'rubygems/sigstore/sign_extend'
-require 'rubygems/sigstore/verify_extend'
+require "rubygems/sigstore/config"
+require 'rubygems/sigstore/options'
 
-Gem::CommandManager.instance.register_command :sign
 Gem::CommandManager.instance.register_command :verify
 
-[:sign, :verify, :build, :install].each do |cmd_name|
-    cmd = Gem::CommandManager.instance[cmd_name]
+# gem install hooks
+i = Gem::CommandManager.instance[:install]
+i.add_option("--[no-]verify",
+             'Verifies a local gem has been signed via sigstore.' +
+             'This helps to ensure the gem has not been tampered with in transit.') do |value, options|
+  Gem::Sigstore.options[:verify] = value
+end
+
+Gem.pre_install do |installer|
+  begin
+    if (Gem::Sigstore.options[:verify])
+      puts "verify called"
+    end
+  rescue Gem::SigstoreException => ex
+    installer.alert_error(ex.message)
+    installer.terminate_interaction(1)
+  end
 end

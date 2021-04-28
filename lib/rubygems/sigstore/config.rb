@@ -12,13 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'rubygems/command_manager'
-require 'rubygems/sigstore/sign_extend'
-require 'rubygems/sigstore/verify_extend'
+require 'config'
 
-Gem::CommandManager.instance.register_command :sign
-Gem::CommandManager.instance.register_command :verify
-
-[:sign, :verify, :build, :install].each do |cmd_name|
-    cmd = Gem::CommandManager.instance[cmd_name]
+class SigStoreConfig
+    def initialize; end
+    def config
+        Config.setup do |config|
+            config.use_env = true
+            config.env_prefix = 'sigstore'
+            config.env_separator = '_'
+        end
+    settings_file = Config.setting_files(
+        File.expand_path('../../../../', __FILE__),
+        'development' # TODO: Get this from gemspec
+    )
+    return Config.load_and_set_settings(settings_file)
+    end
 end
