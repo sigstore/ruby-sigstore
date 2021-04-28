@@ -42,7 +42,7 @@ Or install it yourself as:
 
 ### Install a gem without verification
 
-`gem install foo --verify`
+`gem install foo --noverify`
 
 ## Development
 
