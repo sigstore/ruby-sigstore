@@ -15,6 +15,9 @@
 require 'rubygems/command_manager'
 require "rubygems/sigstore/config"
 require 'rubygems/sigstore/options'
+require "rubygems/sigstore/crypto"
+require "rubygems/sigstore/http_client"
+require "rubygems/sigstore/openid"
 
 Gem::CommandManager.instance.register_command :sign
 
@@ -31,7 +34,11 @@ class Gem::Commands::BuildCommand
     config = SigStoreConfig.new().config
     
     if Gem::Sigstore.options[:sign]
-        puts "sign called"
+        config = SigStoreConfig.new().config
+        priv_key, pub_key = Crypto.new().generate_keys
+        proof, access_token = OpenIDHandler.new(priv_key).get_token
+        cert_response = HttpClient.new().get_cert(access_token, proof, pub_key, config.fulcio_host)
+        puts cert_response
     end
     # original_execute calls the native command
     original_execute
