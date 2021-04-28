@@ -1,8 +1,10 @@
-# Ruby::Sigstore
+# Ruby Sigstore
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ruby/sigstore`. To experiment with that code, run `bin/console` for an interactive prompt.
+> :warning: Still under developement, not ready for production use yet!
 
-TODO: Delete this and the text above, and describe your gem
+This rubygems plugin enables both developers to sign gem files and users to verify the origin
+of a gem. It wraps around the main gem command to allow a level of seamless intergration with
+gem build and install operations.
 
 ## Installation
 
@@ -22,7 +24,25 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Sign an existing gem file
+
+`gem sign foo.gem`
+
+### Verify an existing gem file
+
+`gem verify foo.gem`
+
+### Build and sign a gem
+
+`gem build foo.gemspec --sign`
+
+### Install and verify a gem
+
+`gem install foo --verify`
+
+### Install a gem without verification
+
+`gem install foo --verify`
 
 ## Development
 
@@ -32,7 +52,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/ruby-sigstore.
+Bug reports and pull requests are welcome on GitHub at https://github.com/sigstore/ruby-sigstore.
 
 ## Security
 
