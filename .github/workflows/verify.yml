@@ -24,6 +24,7 @@ on:
 jobs:
   license-check:
     name: license boilerplate check
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
