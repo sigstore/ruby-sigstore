@@ -30,9 +30,9 @@ end
 class Gem::Commands::BuildCommand
   alias_method :original_execute, :execute
   def execute
-    
+
     config = SigStoreConfig.new().config
-    
+
     if Gem::Sigstore.options[:sign]
         config = SigStoreConfig.new().config
         priv_key, pub_key = Crypto.new().generate_keys
