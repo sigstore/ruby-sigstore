@@ -16,6 +16,7 @@ require "rubygems/sigstore/config"
 require "rubygems/sigstore/crypto"
 
 require 'base64'
+require 'cgi'
 require 'digest'
 require 'json/jwt'
 require "launchy"
@@ -39,26 +40,43 @@ class OpenIDHandler
 
         server = TCPServer.new 0
         webserv = Thread.new do
+            response = "You may close this browser"
+            response_code = "200 OK"
             connection = server.accept
             while (input = connection.gets)
-                response = "You may close this browser"
-
-                connection.print "HTTP/1.1 200 OK\r\n" +
+                begin
+                    # VERB PATH HTTP/1.1
+                    http_req = input.split(' ')
+                    if http_req.length() != 3
+                        raise "invalid HTTP request received on callback"
+                    end
+                    params = CGI.parse(URI.parse(http_req[1]).query)
+                    if params["code"].length() != 1 or params["state"].length() != 1
+                        raise "multiple values for code or state returned in callback; unable to process"
+                    end
+                    Thread.current[:code] = params["code"][0]
+                    Thread.current[:state] = params["state"][0]
+                rescue StandardError => e
+                    response = "Error processing request: #{e.message}"
+                    response_code = "400 Bad Request"
+                end
+                connection.print "HTTP/1.1 #{response_code}\r\n" +
                             "Content-Type: text/plain\r\n" +
                             "Content-Length: #{response.bytesize}\r\n" +
                             "Connection: close\r\n"
                 connection.print "\r\n"
                 connection.print response
                 connection.close
-                params = input.split('?')[1].split(' ')[0]     # chop off the verb / http version
-                paramarray  = params.split('&')    # only handles two parameters
-                Thread.current[:code] = paramarray[0].partition('=').last
-                Thread.current[:state] = paramarray[1].partition('=').last
+                if response_code != "200 OK"
+                    raise response
+                end
                 break
             end
         ensure
             server.close
         end
+
+        webserv.abort_on_exception = true
 
         client = OpenIDConnect::Client.new(
             authorization_endpoint: oidc_discovery.authorization_endpoint,
@@ -97,9 +115,9 @@ class OpenIDHandler
 
         provider_public_keys = oidc_discovery.jwks
 
-        email = verify_token(access_token, provider_public_keys, config, session[:nonce])
+        token = verify_token(access_token, provider_public_keys, config, session[:nonce])
 
-        proof = Crypto.new().sign_proof(@priv_key, email)
+        proof = Crypto.new().sign_proof(@priv_key, token["email"])
         return proof, access_token
     end
 
@@ -151,6 +169,6 @@ class OpenIDHandler
             abort 'Email address in OIDC token has not been verified by provider'
         end
 
-        return token["email"]
+        return token
     end
 end
