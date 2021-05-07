@@ -57,8 +57,10 @@ class Gem::Commands::BuildCommand
         proof, access_token = OpenIDHandler.new(priv_key).get_token
         cert_response = HttpClient.new().get_cert(access_token, proof, enc_pub_key, config.fulcio_host)
         certPEM, rootPem = cert_response.split(/\n{2,}/)
-        puts certPEM
-        puts rootPem
+
+        Dir.mkdir("sigstore_cert") unless File.exists?("sigstore_cert")
+        File.write('sigstore_cert/sigstore.pem', certPEM, nil , mode: 'a')
+
         # Run the gem build process (original_execute)
         original_execute
 
@@ -100,7 +102,7 @@ class Gem::Commands::BuildCommand
         data_file = File.read('data.tar.gz')
         data_digest = OpenSSL::Digest::SHA256.new(data_file)
         data_signature = priv_key.sign data_digest, data_file
-        File.open('metadata.gz.sig', 'wb') do |f|
+        File.open('data.tar.gz.sig', 'wb') do |f|
             f.write(data_signature)
         end
 
@@ -113,6 +115,11 @@ class Gem::Commands::BuildCommand
 
         rekor_response = HttpClient.new().submit_rekor(pub_key, data_digest, data_signature, certPEM, Base64.encode64(data_file), config.rekor_host)
         puts rekor_response  
+        #clean up
+        Open3.popen3("rm data.tar.gz data.tar.gz.sig metadata.gz metadata.gz.sig checksums.yaml.gz checksums.yaml.gz.sig") do |stdin, stdout, stderr, thread|
+            puts stdout.read.chomp
+        end
+
     end
   end
 end

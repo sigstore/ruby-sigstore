@@ -1,5 +1,5 @@
-fulcio_host: "http://127.0.0.1:5555"
-rekor_host: "http://127.0.0.1:3000"
+fulcio_host: "https://fulcio.sigstore.dev"
+rekor_host: "https://api.rekor.dev"
 oidc_issuer: "https://oauth2.sigstore.dev/auth"
 oidc_client: "sigstore"
 oidc_secret: ""
