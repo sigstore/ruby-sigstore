@@ -38,7 +38,15 @@ class OpenIDHandler
         # oidc_discovery gem doesn't support code_challenge_methods yet, so we will just blindly include
         pkce = generate_pkce
 
-        server = TCPServer.new 0
+        # If development env, used a fixed port
+        if config.development  == true
+            server = TCPServer.new 5678
+            server_addr = "5678"
+        else
+            server = TCPServer.new 0
+            server_addr = server.addr[1].to_s
+        end
+
         webserv = Thread.new do
             response = "You may close this browser"
             response_code = "200 OK"
@@ -81,7 +89,7 @@ class OpenIDHandler
         client = OpenIDConnect::Client.new(
             authorization_endpoint: oidc_discovery.authorization_endpoint,
             identifier: config.oidc_client,
-            redirect_uri: "http://localhost:" + server.addr[1].to_s,
+            redirect_uri: "http://localhost:" + server_addr,
             secret: config.oidc_secret,
             token_endpoint: oidc_discovery.token_endpoint,
         )
