@@ -11,3 +11,12 @@
 
 # rspec failure tracking
 .rspec_status
+
+# sigstore stuff
+checksums.yaml.gz
+checksums.yaml.gz.sig
+data.tar.gz
+data.tar.gz.sig
+metadata.gz
+metadata.gz.sig
+ruby-sigstore-*.gem

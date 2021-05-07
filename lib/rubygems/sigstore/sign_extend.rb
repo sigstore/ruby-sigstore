@@ -83,12 +83,6 @@ class Gem::Commands::BuildCommand
 
         puts "updating #{spec.full_name}.gem with signed materials"
 
-        # checksums_digest = OpenSSL::Digest::SHA256.new
-        # checksums_signature = priv_key.sign checksums_digest, 'checksums.yaml.gz'
-        # File.open('checksums.yaml.gz.sig', 'wb') do |f|
-        #     f.write(checksums_signature)
-        # end
-
         checksums_file = File.read('checksums.yaml.gz')
         checksums_digest = OpenSSL::Digest::SHA256.new(checksums_file)
         checksums_signature = priv_key.sign checksums_digest, checksums_file
@@ -110,16 +104,14 @@ class Gem::Commands::BuildCommand
             f.write(data_signature)
         end
 
-        data_encoded = File.open('data.tar.gz').read # lets try line 106 instead
         # TODO: Yeah, I know.
         Open3.popen3("tar -cvf #{spec.full_name}_signed.gem data.tar.gz data.tar.gz.sig metadata.gz metadata.gz.sig checksums.yaml.gz checksums.yaml.gz.sig") do |stdin, stdout, stderr, thread|
             puts stdout.read.chomp
         end
-        
 
         puts "sigstore signing operation complete"
 
-        rekor_response = HttpClient.new().submit_rekor(pub_key, data_digest, data_signature, certPEM, Base64.encode64(data_encoded), config.rekor_host)      
+        rekor_response = HttpClient.new().submit_rekor(pub_key, data_digest, data_signature, certPEM, Base64.encode64(data_file), config.rekor_host)
         puts rekor_response  
     end
   end
