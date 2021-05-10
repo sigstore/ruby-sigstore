@@ -29,7 +29,6 @@ class OpenIDHandler
 
     def get_token()
         config = SigStoreConfig.new().config
-
         session = {}
         session[:state] = SecureRandom.hex(16)
         session[:nonce] = SecureRandom.hex(16)
