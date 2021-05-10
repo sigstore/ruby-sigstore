@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# require 'rubygems/commands'
-# require 'minitar'
 require 'digest'
 require 'fileutils'
-require 'minitar'
 require 'open3'
 require 'openssl'
 require 'rubygems/package'
