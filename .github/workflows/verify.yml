@@ -20,5 +20,5 @@ jobs:
       - name: Check license headers
         run: |
           set -e
-          addlicense -l apache -c 'The Sigstore Authors' -v -skip yml -skip yaml -skip Gemfile *
+          addlicense -l apache -c 'The Sigstore Authors' -v -ignore *.yml -ignore *.yaml -ignore Gemfile *
           git diff --exit-code
