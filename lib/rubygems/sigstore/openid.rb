@@ -107,6 +107,7 @@ class OpenIDHandler
             # NOTE: ignore any exception, as the URL is printed above and may be
             #       opened manually
             puts "Cannot open browser automatically, please click on the link below:"
+            puts ""
             puts authorization_uri
         end
 
