@@ -15,22 +15,22 @@
 require 'base64'
 require 'openssl'
 
-class Crypto 
-    def initialize; end
+class Crypto
+  def initialize; end
 
-    def generate_keys
-        key = OpenSSL::PKey::RSA.generate(2048)
-        pkey = key.public_key
-        return [key, pkey, Base64.encode64(pkey.to_der)]
-    end
+  def generate_keys
+    key = OpenSSL::PKey::RSA.generate(2048)
+    pkey = key.public_key
+    return [key, pkey, Base64.encode64(pkey.to_der)]
+  end
 
-    def sign_proof(priv_key, email)
-        proof = priv_key.sign(OpenSSL::Digest::SHA256.new, email)
-        return Base64.encode64(proof)
-    end
+  def sign_proof(priv_key, email)
+    proof = priv_key.sign(OpenSSL::Digest::SHA256.new, email)
+    return Base64.encode64(proof)
+  end
 end
 
-# class Crypto 
+# class Crypto
 #     def initialize; end
 
 #     def generate_keys
@@ -45,4 +45,3 @@ end
 #         return Base64.encode64(proof)
 #     end
 # end
-

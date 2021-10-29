@@ -41,10 +41,10 @@ class Gem::Commands::SignCommand < Gem::Command
   end
 
   def execute
-    config = SigStoreConfig.new().config
-    priv_key, pub_key = Crypto.new().generate_keys
+    config = SigStoreConfig.new.config
+    priv_key, pub_key = Crypto.new.generate_keys
     proof, access_token = OpenIDHandler.new(priv_key).get_token
-    cert_response = HttpClient.new().get_cert(access_token, proof, pub_key, config.fulcio_host)
+    cert_response = HttpClient.new.get_cert(access_token, proof, pub_key, config.fulcio_host)
     puts cert_response
   end
 end
