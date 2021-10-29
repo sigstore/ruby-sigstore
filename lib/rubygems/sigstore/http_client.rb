@@ -16,7 +16,9 @@ require "faraday_middleware"
 require "openssl"
 
 class HttpClient
-  def initialize; end
+  def initialize
+  end
+
   def get_cert(id_token, proof, pub_key, fulcio_host)
     connection = Faraday.new do |request|
       request.authorization :Bearer, id_token.to_s
@@ -28,7 +30,8 @@ class HttpClient
     fulcio_response = connection.post("/api/v1/signingCert", { publicKey: { content: pub_key, algorithm: "ecdsa" }, signedEmailAddress: proof})
     return fulcio_response.body
   end
-  def submit_rekor(pub_key, data_digest, data_signature, certPEM, data_raw, rekor_host)
+
+  def submit_rekor(cert_chain, data_digest, data_signature, certPEM, data_raw, rekor_host)
     # rekor uses a self signed certificate which failes the ssl check
     connection = Faraday.new(ssl: { verify: false }) do |request|
       # request.authorization :Bearer, id_token.to_s
@@ -46,7 +49,7 @@ class HttpClient
                 format: "x509",
                     content: Base64.encode64(data_signature),
                     publicKey: {
-                      content: Base64.encode64(pub_key.to_pem),
+                      content: Base64.encode64(cert_chain),
                     },
               },
                 data: {
