@@ -20,5 +20,5 @@ Gem::CommandManager.instance.register_command :sign
 Gem::CommandManager.instance.register_command :verify
 
 [:sign, :verify, :build, :install].each do |cmd_name|
-    cmd = Gem::CommandManager.instance[cmd_name]
+  cmd = Gem::CommandManager.instance[cmd_name]
 end

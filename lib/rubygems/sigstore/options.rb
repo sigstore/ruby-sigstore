@@ -13,9 +13,10 @@
 # limitations under the License.
 
 module Gem::Sigstore
-    private
-    def self.options
-      @options ||= {}
-      @options
-    end
+  private
+
+  def self.options
+    @options ||= {}
+    @options
+  end
 end
