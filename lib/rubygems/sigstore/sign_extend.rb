@@ -14,7 +14,6 @@
 
 require 'digest'
 require 'fileutils'
-require 'open3'
 require 'openssl'
 require 'rubygems/package'
 require 'rubygems/command_manager'
@@ -23,19 +22,9 @@ require 'rubygems/sigstore/options'
 require "rubygems/sigstore/crypto"
 require "rubygems/sigstore/http_client"
 require "rubygems/sigstore/openid"
+require "rubygems/sigstore/gemfile"
 
 Gem::CommandManager.instance.register_command :sign
-
-def find_gemspec(glob = "*.gemspec")
-  gemspecs = Dir.glob(glob).sort
-
-  if gemspecs.size > 1
-    alert_error "Multiple gemspecs found: #{gemspecs}, please specify one"
-    terminate_interaction(1)
-  end
-
-  gemspecs.first
-end
 
 # overde the generic gem build command to lay are own --sign option on top
 b = Gem::CommandManager.instance[:build]
@@ -59,14 +48,8 @@ class Gem::Commands::BuildCommand
       # Run the gem build process (original_execute)
       original_execute
 
-      # Find the gemspec file for the project
-      gemspec_file = find_gemspec
-      spec = Gem::Specification::load(gemspec_file)
-
-      gem_file_path = "#{spec.full_name}.gem"
-      gem_file = File.read(gem_file_path)
-      gem_file_digest = OpenSSL::Digest::SHA256.new(gem_file)
-      gem_file_signature = priv_key.sign gem_file_digest, gem_file
+      gem_file = Gem::Sigstore::Gemfile.find_gemspec
+      gem_file_signature = priv_key.sign gem_file.digest, gem_file.content
 
       content = <<~CONTENT
 
@@ -76,7 +59,7 @@ class Gem::Commands::BuildCommand
       CONTENT
       puts content
 
-      rekor_response = HttpClient.new.submit_rekor(cert_response, gem_file_digest, gem_file_signature, certPEM, Base64.encode64(gem_file), config.rekor_host)
+      rekor_response = HttpClient.new.submit_rekor(cert_response, gem_file.digest, gem_file_signature, certPEM, gem_file.content, config.rekor_host)
       puts "rekor response: "
       pp rekor_response
     end

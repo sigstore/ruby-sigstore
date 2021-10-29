@@ -53,7 +53,7 @@ class HttpClient
                   },
             },
               data: {
-                content: data_raw,
+                content: Base64.encode64(data_raw),
                   hash: {
                     algorithm: "sha256",
                       value: data_digest,

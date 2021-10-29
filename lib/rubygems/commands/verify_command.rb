@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "rubygems/sigstore/gemfile"
 
 class Gem::Commands::VerifyCommand < Gem::Command
   def initialize
@@ -26,15 +27,15 @@ class Gem::Commands::VerifyCommand < Gem::Command
     puts "verify \"#{gem_path}\""
 
     raise Gem::CommandLineError, "#{gem_path} is not a file" unless File.file?(gem_path)
-    contents = File.read(gem_path)
-    digest = OpenSSL::Digest::SHA256.new(contents)
+
+    gemfile = Gem::Sigstore::Gemfile.new(gem_path)
 
     config = SigStoreConfig.new.config
 
-    entries = HttpClient.new.get_rekor_entries(digest, config.rekor_host)
+    entries = HttpClient.new.get_rekor_entries(gemfile.digest, config.rekor_host)
     rekord_hashes = entries.map { |entry| rekord_from_entry(entry.values.first) }
 
-    rekord = rekord_hashes.find { |rekord| valid_signature?(rekord, digest, contents) }
+    rekord = rekord_hashes.find { |rekord| valid_signature?(rekord, gemfile.digest, gemfile.content) }
 
     if rekord
       puts ":noice:, signed by #{signer_email(rekord)}"
@@ -81,7 +82,7 @@ class Gem::Commands::VerifyCommand < Gem::Command
 
     key = key_from_cert(cert)
 
-    key.verify(digest, signature, contents)
+    key.verify(gemfile.digest, signature, contents)
   end
 
   def key_from_cert(cert)

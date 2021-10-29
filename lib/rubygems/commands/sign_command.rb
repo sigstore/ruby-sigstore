@@ -17,6 +17,7 @@ require "rubygems/sigstore/config"
 require "rubygems/sigstore/crypto"
 require "rubygems/sigstore/http_client"
 require "rubygems/sigstore/openid"
+require "rubygems/sigstore/gemfile"
 
 require 'json/jwt'
 require "launchy"
@@ -49,10 +50,8 @@ class Gem::Commands::SignCommand < Gem::Command
     print cert_response
     puts ""
 
-    gem_file_path = get_one_gem_name
-    gem_file = File.read(gem_file_path)
-    gem_file_digest = OpenSSL::Digest::SHA256.new(gem_file)
-    gem_file_signature = priv_key.sign gem_file_digest, gem_file
+    gem_file = Gem::Sigstore::Gemfile.new(get_one_gem_name)
+    gem_file_signature = priv_key.sign gem_file.digest, gem_file.content
 
     content = <<~CONTENT
 
@@ -62,7 +61,7 @@ class Gem::Commands::SignCommand < Gem::Command
     CONTENT
     puts content
 
-    rekor_response = HttpClient.new.submit_rekor(cert_response, gem_file_digest, gem_file_signature, nil, Base64.encode64(gem_file), config.rekor_host)
+    rekor_response = HttpClient.new.submit_rekor(cert_response, gem_file.digest, gem_file_signature, nil, Base64.encode64(gem_file), config.rekor_host)
     puts "rekor response: "
     pp rekor_response
   end
