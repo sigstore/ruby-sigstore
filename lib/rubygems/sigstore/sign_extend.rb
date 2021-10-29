@@ -50,17 +50,11 @@ class Gem::Commands::BuildCommand
 
     if Gem::Sigstore.options[:sign]
       config = SigStoreConfig.new.config
-      priv_key, pub_key, enc_pub_key = Crypto.new.generate_keys
+      priv_key, _pub_key, enc_pub_key = Crypto.new.generate_keys
       proof, access_token = OpenIDHandler.new(priv_key).get_token
       puts ""
       cert_response = HttpClient.new.get_cert(access_token, proof, enc_pub_key, config.fulcio_host)
-      certPEM, rootPem = cert_response.split(/\n{2,}/)
-
-      Dir.mkdir("certs") unless File.exists?("certs")
-      File.write('certs/sigstore.pem', "#{certPEM}\n", nil , mode: 'w+')
-
-      puts "Received fulcio signing certicate: certs/sigstore.pem"
-      puts ""
+      certPEM, _rootPem = cert_response.split(/\n{2,}/)
 
       # Run the gem build process (original_execute)
       original_execute
@@ -70,22 +64,21 @@ class Gem::Commands::BuildCommand
       spec = Gem::Specification::load(gemspec_file)
 
       gem_file_path = "#{spec.full_name}.gem"
-      gem_file_sig_path = "#{gem_file_path}.sig"
       gem_file = File.read(gem_file_path)
       gem_file_digest = OpenSSL::Digest::SHA256.new(gem_file)
       gem_file_signature = priv_key.sign gem_file_digest, gem_file
 
-      puts ""
-      puts "  sigstore signing operation complete"
-      puts ""
-      puts "  sending signing manifests to rekor.."
-      puts ""
+      content = <<~CONTENT
 
-      rekor_response = HttpClient.new.submit_rekor(pub_key, gem_file_digest, gem_file_signature, certPEM, Base64.encode64(data_file), config.rekor_host)
-      print "  rekor response: "
-      puts rekor_response
+        sigstore signing operation complete."
 
-      puts "signed file: #{spec.full_name}_signed.gem"
+        sending signiture & certificate chain to rekor."
+      CONTENT
+      puts content
+
+      rekor_response = HttpClient.new.submit_rekor(cert_response, gem_file_digest, gem_file_signature, certPEM, Base64.encode64(gem_file), config.rekor_host)
+      puts "rekor response: "
+      pp rekor_response
     end
   end
 end
