@@ -26,7 +26,7 @@ require "rubygems/sigstore/config"
 require 'rubygems/sigstore/options'
 require "rubygems/sigstore/crypto"
 require "rubygems/sigstore/fulcio_api"
-require "rubygems/sigstore/http_client"
+require "rubygems/sigstore/rekor_api"
 require "rubygems/sigstore/openid"
 require "rubygems/sigstore/gemfile"
 
@@ -50,9 +50,7 @@ class Gem::Commands::BuildCommand
       puts ""
 
       fulcio_api = Gem::Sigstore::FulcioApi.new(token: access_token, host: config.fulcio_host)
-      cert_response = fulcio_api.post(proof, enc_pub_key)
-
-      certPEM, _rootPem = cert_response.split(/\n{2,}/)
+      cert_response = fulcio_api.create(proof, enc_pub_key)
 
       # Run the gem build process (original_execute)
       original_execute
@@ -68,7 +66,9 @@ class Gem::Commands::BuildCommand
       CONTENT
       puts content
 
-      rekor_response = HttpClient.new.submit_rekor(cert_response, gem_file.digest, gem_file_signature, certPEM, gem_file.content, config.rekor_host)
+      data = Gem::Sigstore::RekorApi::Data.new(gem_file.digest, gem_file_signature, gem_file.content)
+      rekor_api = Gem::Sigstore::RekorApi.new(host: config.fulcio_host)
+      rekor_response = rekor_api.create(cert_response, data)
       puts "rekor response: "
       pp rekor_response
     end

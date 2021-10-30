@@ -34,10 +34,10 @@ class Gem::Commands::VerifyCommand < Gem::Command
     raise Gem::CommandLineError, "#{gem_path} is not a file" unless File.file?(gem_path)
 
     gemfile = Gem::Sigstore::Gemfile.new(gem_path)
-
     config = Gem::Sigstore::Config.read
 
-    entries = HttpClient.new.get_rekor_entries(gemfile.digest, config.rekor_host)
+    rekor_api = Gem::Sigstore::RekorApi.new(host: config.fulcio_host)
+    entries = rekor_api.where(data_digest: gemfile.digest)
     rekord_hashes = entries.map { |entry| rekord_from_entry(entry.values.first) }
 
     rekord = rekord_hashes.find { |rekord| valid_signature?(rekord, gemfile.digest, gemfile.content) }

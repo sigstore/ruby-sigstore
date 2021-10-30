@@ -7,7 +7,7 @@ class Gem::Sigstore::FulcioApi
     @token = token.to_s
   end
 
-  def post(proof, pub_key)
+  def create(proof, pub_key)
     connection.post("/api/v1/signingCert", {
       publicKey: {
         content: pub_key,
