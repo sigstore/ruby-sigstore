@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+module Gem
+  module Sigstore
+  end
+end
+
 require 'rubygems/command'
 require "rubygems/sigstore/config"
 require "rubygems/sigstore/crypto"
@@ -42,9 +47,9 @@ class Gem::Commands::SignCommand < Gem::Command
   end
 
   def execute
-    config = SigStoreConfig.new.config
-    priv_key, _pub_key, enc_pub_key = Crypto.new.generate_keys
-    proof, access_token = OpenIDHandler.new(priv_key).get_token
+    config = Gem::Sigstore::Config.read
+    priv_key, _pub_key, enc_pub_key = Gem::Sigstore::Crypto.new.generate_keys
+    proof, access_token = Gem::Sigstore::OpenID.new(priv_key).get_token
     cert_response = HttpClient.new.get_cert(access_token, proof, enc_pub_key, config.fulcio_host)
     puts "Fulcio cert chain"
     print cert_response
@@ -61,7 +66,7 @@ class Gem::Commands::SignCommand < Gem::Command
     CONTENT
     puts content
 
-    rekor_response = HttpClient.new.submit_rekor(cert_response, gem_file.digest, gem_file_signature, nil, Base64.encode64(gem_file), config.rekor_host)
+    rekor_response = HttpClient.new.submit_rekor(cert_response, gem_file.digest, gem_file_signature, nil, gem_file, config.rekor_host)
     puts "rekor response: "
     pp rekor_response
   end

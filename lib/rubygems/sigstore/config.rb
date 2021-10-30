@@ -14,18 +14,32 @@
 
 require 'config'
 
-class SigStoreConfig
-  def initialize; end
-  def config
-    Config.setup do |config|
-      config.use_env = true
-      config.env_prefix = 'sigstore'
-      config.env_separator = '_'
+module Gem
+  module Sigstore
+  end
+end
+
+class Gem::Sigstore::Config
+  class << self
+    def read
+      ::Config.load_and_set_settings(settings_file)
     end
-    settings_file = Config.setting_files(
+
+    private
+
+    def setup
+      ::Config.setup do |config|
+        config.use_env = true
+        config.env_prefix = 'sigstore'
+        config.env_separator = '_'
+      end
+    end
+
+    def settings_file
+      ::Config.setting_files(
         File.expand_path('../../../../', __FILE__),
         'development' # TODO: Get this from gemspec
       )
-    return Config.load_and_set_settings(settings_file)
+    end
   end
 end

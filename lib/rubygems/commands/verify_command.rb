@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+module Gem
+  module Sigstore
+  end
+end
+
 require "rubygems/sigstore/gemfile"
 
 class Gem::Commands::VerifyCommand < Gem::Command
@@ -30,7 +35,7 @@ class Gem::Commands::VerifyCommand < Gem::Command
 
     gemfile = Gem::Sigstore::Gemfile.new(gem_path)
 
-    config = SigStoreConfig.new.config
+    config = Gem::Sigstore::Config.read
 
     entries = HttpClient.new.get_rekor_entries(gemfile.digest, config.rekor_host)
     rekord_hashes = entries.map { |entry| rekord_from_entry(entry.values.first) }

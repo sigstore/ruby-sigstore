@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+module Gem
+  module Sigstore
+  end
+end
+
 require 'base64'
 require 'openssl'
 
-class Crypto
-  def initialize; end
-
+class Gem::Sigstore::Crypto
   def generate_keys
     key = OpenSSL::PKey::RSA.generate(2048)
     pkey = key.public_key

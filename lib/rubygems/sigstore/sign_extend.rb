@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+module Gem
+  module Sigstore
+  end
+end
+
 require 'digest'
 require 'fileutils'
 require 'openssl'
@@ -35,12 +40,12 @@ end
 class Gem::Commands::BuildCommand
   alias_method :original_execute, :execute
   def execute
-    config = SigStoreConfig.new.config
+    config = Gem::Sigstore::Config.read
 
     if Gem::Sigstore.options[:sign]
-      config = SigStoreConfig.new.config
-      priv_key, _pub_key, enc_pub_key = Crypto.new.generate_keys
-      proof, access_token = OpenIDHandler.new(priv_key).get_token
+      config = Gem::Sigstore::Config.read
+      priv_key, _pub_key, enc_pub_key = Gem::Sigstore::Crypto.new.generate_keys
+      proof, access_token = Gem::Sigstore::OpenID.new(priv_key).get_token
       puts ""
       cert_response = HttpClient.new.get_cert(access_token, proof, enc_pub_key, config.fulcio_host)
       certPEM, _rootPem = cert_response.split(/\n{2,}/)

@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+module Gem
+  module Sigstore
+  end
+end
+
 require "rubygems/sigstore/config"
 require "rubygems/sigstore/crypto"
 
@@ -22,13 +27,13 @@ require 'json/jwt'
 require "launchy"
 require "openid_connect"
 
-class OpenIDHandler
+class Gem::Sigstore::OpenID
   def initialize(priv_key)
     @priv_key = priv_key
   end
 
   def get_token()
-    config = SigStoreConfig.new.config
+    config = Gem::Sigstore::Config.read
     session = {}
     session[:state] = SecureRandom.hex(16)
     session[:nonce] = SecureRandom.hex(16)
@@ -127,7 +132,7 @@ class OpenIDHandler
 
     token = verify_token(access_token, provider_public_keys, config, session[:nonce])
 
-    proof = Crypto.new.sign_proof(@priv_key, token["email"])
+    proof = Gem::Sigstore::Crypto.new.sign_proof(@priv_key, token["email"])
     return proof, access_token
   end
 
