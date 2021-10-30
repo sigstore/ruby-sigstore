@@ -10,23 +10,23 @@ class Gem::Sigstore::RekorApi
     connection.post("/api/v1/log/entries",
       {
         kind: "rekord",
-          apiVersion: "0.0.1",
-          spec: {
-            signature: {
-              format: "x509",
-                  content: Base64.encode64(data.signature),
-                  publicKey: {
-                    content: Base64.encode64(cert_chain),
-                  },
+        apiVersion: "0.0.1",
+        spec: {
+          signature: {
+            format: "x509",
+            content: Base64.encode64(data.signature),
+            publicKey: {
+              content: Base64.encode64(cert_chain),
             },
-              data: {
-                content: Base64.encode64(data.raw),
-                  hash: {
-                    algorithm: "sha256",
-                      value: data.digest,
-                  },
-              },
           },
+          data: {
+            content: Base64.encode64(data.raw),
+            hash: {
+              algorithm: "sha256",
+              value: data.digest,
+            },
+          },
+        },
       }).body
   end
 

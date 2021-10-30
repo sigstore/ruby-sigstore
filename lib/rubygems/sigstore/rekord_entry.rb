@@ -1,4 +1,4 @@
-class Gem::Sigstore::RekordEntries
+class Gem::Sigstore::RekordEntry
   def initialize(entry)
     @entry = entry
   end

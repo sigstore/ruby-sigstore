@@ -1,4 +1,4 @@
-require "rubygems/sigstore/rekord_entries"
+require "rubygems/sigstore/rekord_entry"
 
 class Gem::Sigstore::GemVerifier
   Data = Struct.new(:digest, :signature, :raw)
@@ -10,7 +10,7 @@ class Gem::Sigstore::GemVerifier
   end
 
   def run
-    rekor_api = Gem::Sigstore::RekorApi.new(host: config.fulcio_host)
+    rekor_api = Gem::Sigstore::RekorApi.new(host: config.rekor_host)
     entries = rekor_api.where(data_digest: gemfile.digest)
     rekord_entries = entries.map { |entry| RekordEntry.new(entry.values.first) }
     rekord = rekord_entries.find { |entry| entry.valid_signature?(gemfile.digest, gemfile.content) }
