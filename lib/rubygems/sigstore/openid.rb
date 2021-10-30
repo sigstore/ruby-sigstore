@@ -132,7 +132,8 @@ class Gem::Sigstore::OpenID
 
     token = verify_token(access_token, provider_public_keys, config, session[:nonce])
 
-    proof = Gem::Sigstore::Crypto.new.sign_proof(@priv_key, token["email"])
+    pkey = Gem::Sigstore::PKey.new(private_key: @priv_key)
+    proof = pkey.sign_proof(token["email"])
     return proof, access_token
   end
 

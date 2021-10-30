@@ -2,8 +2,6 @@ require "faraday_middleware"
 require "openssl"
 
 class Gem::Sigstore::RekorApi
-  Data = Struct.new(:digest, :signature, :raw)
-
   def initialize(host:)
     @host = host
   end

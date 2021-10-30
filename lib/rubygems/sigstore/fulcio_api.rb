@@ -10,7 +10,7 @@ class Gem::Sigstore::FulcioApi
   def create(proof, pub_key)
     connection.post("/api/v1/signingCert", {
       publicKey: {
-        content: pub_key,
+        content: Base64.encode64(pub_key),
         algorithm: "ecdsa"
       },
       signedEmailAddress: proof

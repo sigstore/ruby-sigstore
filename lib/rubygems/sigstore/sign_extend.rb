@@ -29,6 +29,9 @@ require "rubygems/sigstore/fulcio_api"
 require "rubygems/sigstore/rekor_api"
 require "rubygems/sigstore/openid"
 require "rubygems/sigstore/gemfile"
+require "rubygems/sigstore/cert_provider"
+require "rubygems/sigstore/file_signer"
+require "rubygems/sigstore/gem_signer"
 
 Gem::CommandManager.instance.register_command :sign
 
@@ -41,36 +44,15 @@ end
 class Gem::Commands::BuildCommand
   alias_method :original_execute, :execute
   def execute
-    config = Gem::Sigstore::Config.read
-
     if Gem::Sigstore.options[:sign]
-      config = Gem::Sigstore::Config.read
-      priv_key, _pub_key, enc_pub_key = Gem::Sigstore::Crypto.new.generate_keys
-      proof, access_token = Gem::Sigstore::OpenID.new(priv_key).get_token
-      puts ""
-
-      fulcio_api = Gem::Sigstore::FulcioApi.new(token: access_token, host: config.fulcio_host)
-      cert_response = fulcio_api.create(proof, enc_pub_key)
-
-      # Run the gem build process (original_execute)
-      original_execute
-
-      gem_file = Gem::Sigstore::Gemfile.find_gemspec
-      gem_file_signature = priv_key.sign gem_file.digest, gem_file.content
-
-      content = <<~CONTENT
-
-        sigstore signing operation complete."
-
-        sending signiture & certificate chain to rekor."
-      CONTENT
-      puts content
-
-      data = Gem::Sigstore::RekorApi::Data.new(gem_file.digest, gem_file_signature, gem_file.content)
-      rekor_api = Gem::Sigstore::RekorApi.new(host: config.fulcio_host)
-      rekor_response = rekor_api.create(cert_response, data)
-      puts "rekor response: "
-      pp rekor_response
+      gemfile = Gem::Sigstore::Gemfile.new(get_one_gem_name)
+      gem_signer = Gem::Sigstore::GemSigner.new(
+        gemfile: gemfile,
+        config: Gem::Sigstore::Config.read
+      )
+      # Run the gem build process only if openid auth was successful (original_execute)
+      rekor_entry = gem_signer.run { original_execute }
+      pp rekor_entry
     end
   end
 end

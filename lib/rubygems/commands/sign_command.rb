@@ -23,6 +23,9 @@ require "rubygems/sigstore/crypto"
 require "rubygems/sigstore/fulcio_api"
 require "rubygems/sigstore/openid"
 require "rubygems/sigstore/gemfile"
+require "rubygems/sigstore/cert_provider"
+require "rubygems/sigstore/file_signer"
+require "rubygems/sigstore/gem_signer"
 
 require 'json/jwt'
 require "launchy"
@@ -47,32 +50,11 @@ class Gem::Commands::SignCommand < Gem::Command
   end
 
   def execute
-    config = Gem::Sigstore::Config.read
-    priv_key, _pub_key, enc_pub_key = Gem::Sigstore::Crypto.new.generate_keys
-    proof, access_token = Gem::Sigstore::OpenID.new(priv_key).get_token
-
-    fulcio_api = Gem::Sigstore::FulcioApi.new(token: access_token, host: config.fulcio_host)
-    cert_response = fulcio_api.create(proof, enc_pub_key)
-
-    puts "Fulcio cert chain"
-    print cert_response
-    puts ""
-
-    gem_file = Gem::Sigstore::Gemfile.new(get_one_gem_name)
-    gem_file_signature = priv_key.sign gem_file.digest, gem_file.content
-
-    content = <<~CONTENT
-
-      sigstore signing operation complete."
-
-      sending signiture & certificate chain to rekor."
-    CONTENT
-    puts content
-
-    data = Gem::Sigstore::RekorApi::Data.new(gem_file.digest, gem_file_signature, gem_file.content)
-    rekor_api = Gem::Sigstore::RekorApi.new(host: config.fulcio_host)
-    rekor_response = rekor_api.create(cert_response, data)
-    puts "rekor response: "
-    pp rekor_response
+    gemfile = Gem::Sigstore::Gemfile.new(get_one_gem_name)
+    rekor_entry = Gem::Sigstore::GemSigner.new(
+      gemfile: gemfile,
+      config: Gem::Sigstore::Config.read
+    ).run
+    pp rekor_entry
   end
 end
