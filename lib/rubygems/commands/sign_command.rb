@@ -20,6 +20,7 @@ end
 require 'rubygems/command'
 require "rubygems/sigstore/config"
 require "rubygems/sigstore/crypto"
+require "rubygems/sigstore/fulcio_api"
 require "rubygems/sigstore/http_client"
 require "rubygems/sigstore/openid"
 require "rubygems/sigstore/gemfile"
@@ -50,7 +51,10 @@ class Gem::Commands::SignCommand < Gem::Command
     config = Gem::Sigstore::Config.read
     priv_key, _pub_key, enc_pub_key = Gem::Sigstore::Crypto.new.generate_keys
     proof, access_token = Gem::Sigstore::OpenID.new(priv_key).get_token
-    cert_response = HttpClient.new.get_cert(access_token, proof, enc_pub_key, config.fulcio_host)
+
+    fulcio_api = Gem::Sigstore::FulcioApi.new(token: access_token, host: config.fulcio_host)
+    cert_response = fulcio_api.post(proof, enc_pub_key)
+
     puts "Fulcio cert chain"
     print cert_response
     puts ""
