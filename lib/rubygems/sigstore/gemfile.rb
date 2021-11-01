@@ -33,7 +33,15 @@ class Gem::Sigstore::Gemfile
     @digest ||= OpenSSL::Digest::SHA256.new(content)
   end
 
+  def package
+    @package ||= Gem::Package.new(path)
+  end
+
   def spec
-    @spec ||= Gem::Specification::load(@path)
+    package.spec
+  end
+
+  def maintainer?(email)
+    Array(spec.email).include?(email)
   end
 end
