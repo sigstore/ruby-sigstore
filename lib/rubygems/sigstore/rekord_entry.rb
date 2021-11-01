@@ -3,12 +3,6 @@ class Gem::Sigstore::RekordEntry
     @entry = entry
   end
 
-  private
-
-  def body
-    @body ||= JSON.parse(Base64.decode64(@entry["body"]))
-  end
-
   def valid_signature?(digest, contents)
     # {
     #   "apiVersion"=>"0.0.1",
@@ -34,6 +28,16 @@ class Gem::Sigstore::RekordEntry
     public_key.verify(digest, signature, contents)
   end
 
+  def signer_email
+    extensions["subjectAltName"]&.delete_prefix("email:")
+  end
+
+  private
+
+  def body
+    @body ||= JSON.parse(Base64.decode64(@entry["body"]))
+  end
+
   def cert
     @cert ||= begin
       cert = Base64.decode64(body.dig("spec", "signature", "publicKey", "content"))
@@ -48,10 +52,6 @@ class Gem::Sigstore::RekordEntry
       raise "Expecting a signature in #{body}" unless signature
       signature
     end
-  end
-
-  def signer_email
-    extensions["subjectAltName"]&.delete_prefix("email:")
   end
 
   def extensions

@@ -22,7 +22,7 @@ class Gem::Sigstore::Gemfile
   end
 
   def path
-    "#{spec.full_name}.gem"
+    @path
   end
 
   def content
