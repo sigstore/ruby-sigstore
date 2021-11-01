@@ -10,6 +10,8 @@
 /certs/
 *.gem
 
+.byebug_history
+
 # rspec failure tracking
 .rspec_status
 
@@ -21,3 +23,5 @@ data.tar.gz.sig
 metadata.gz
 metadata.gz.sig
 ruby-sigstore-*.gem
+
+rekor-cli
