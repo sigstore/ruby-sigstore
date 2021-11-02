@@ -16,7 +16,7 @@ class Gem::Sigstore::GemVerifier
     rekords = rekord_entries.select { |entry| valid_signature?(entry, gemfile) }
 
     if rekords.empty?
-      io.puts "not :noice: thxkbye"
+      io.puts "No valid signatures found for digest #{gemfile.digest}"
     else
       io.puts ":noice:"
       print_signers(rekords)
@@ -53,6 +53,6 @@ class Gem::Sigstore::GemVerifier
   def email_list(emails)
     return emails.first if emails.size == 1
 
-    emails[...-1].join(", ") + " and #{emails.last}"
+    emails[0...-1].join(", ") + " and #{emails.last}"
   end
 end

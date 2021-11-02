@@ -13,10 +13,10 @@ class Gem::Sigstore::GemSigner
 
     yield if block_given?
 
-    io.puts "Fulcio cert chain"
+    io.puts "Fulcio certificate chain"
     io.puts cert
     io.puts
-    io.puts "sending signiture & certificate chain to rekor."
+    io.puts "Sending gem digest, signature & certificate chain to transparency log."
 
     Gem::Sigstore::FileSigner.new(
       file: gemfile,

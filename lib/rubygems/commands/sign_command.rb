@@ -55,6 +55,12 @@ class Gem::Commands::SignCommand < Gem::Command
       gemfile: gemfile,
       config: Gem::Sigstore::Config.read
     ).run
-    pp rekor_entry
+    pp log_entry_url(rekor_entry)
+  end
+
+  private
+
+  def log_entry_url(rekor_entry)
+    "#{Gem::Sigstore::Config.read.rekor_host}/api/v1/log/entries/#{rekor_entry.keys.first}"
   end
 end
