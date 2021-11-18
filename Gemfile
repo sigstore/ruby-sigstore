@@ -13,5 +13,13 @@ group :development do
   gem "rubocop", "~> 0.80.1"
   gem "rubocop-performance", "~> 1.5.2"
   gem "rake", "~> 12.0"
-  gem "rspec", "~> 3.0"
+end
+
+group :test do
+  gem "test-unit", "~> 3.0"
+  gem "webmock", "~> 3.0"
+end
+
+group :development, :test do
+  gem "byebug"
 end
