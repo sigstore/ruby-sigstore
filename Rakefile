@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require "bundler/gem_tasks"
-require "rspec/core/rake_task"
+require 'rake/testtask'
 
-RSpec::Core::RakeTask.new(:spec)
+Rake::TestTask.new do |t|
+  t.libs << "lib"
+  t.libs << "test"
 
-task :default => :spec
+  t.test_files = FileList['test/**/test_*.rb']
+end
+
+task :default => :test

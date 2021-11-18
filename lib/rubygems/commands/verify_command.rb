@@ -32,7 +32,7 @@ class Gem::Commands::VerifyCommand < Gem::Command
 
   def execute
     gem_path = get_one_gem_name
-    puts "Verifying #{gem_path}"
+    say "Verifying #{gem_path}"
 
     raise Gem::CommandLineError, "#{gem_path} is not a file" unless File.file?(gem_path)
 

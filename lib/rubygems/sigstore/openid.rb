@@ -28,6 +28,8 @@ require "launchy"
 require "openid_connect"
 
 class Gem::Sigstore::OpenID
+  include Gem::UserInteraction
+
   def initialize(priv_key)
     @priv_key = priv_key
   end
@@ -43,7 +45,7 @@ class Gem::Sigstore::OpenID
     pkce = generate_pkce
 
     # If development env, used a fixed port
-    if config.development == true
+    if config.development == true || ENV["SIGSTORE_TEST"]
       server = TCPServer.new 5678
       server_addr = "5678"
     else
@@ -91,31 +93,36 @@ class Gem::Sigstore::OpenID
     end
 
     webserv.abort_on_exception = true
+    redirect_uri = "http://localhost:" + server_addr
 
     client = OpenIDConnect::Client.new(
-        authorization_endpoint: oidc_discovery.authorization_endpoint,
-        identifier: config.oidc_client,
-        redirect_uri: "http://localhost:" + server_addr,
-        secret: config.oidc_secret,
-        token_endpoint: oidc_discovery.token_endpoint,
-      )
+      authorization_endpoint: oidc_discovery.authorization_endpoint,
+      identifier: config.oidc_client,
+      redirect_uri: redirect_uri,
+      secret: config.oidc_secret,
+      token_endpoint: oidc_discovery.token_endpoint,
+    )
 
     authorization_uri = client.authorization_uri(
-        scope: ["openid", :email],
-        state: session[:state],
-        nonce: session[:nonce],
-        code_challenge_method: pkce[:method],
-        code_challenge: pkce[:challenge],
-      )
+      scope: ["openid", :email],
+      state: session[:state],
+      nonce: session[:nonce],
+      code_challenge_method: pkce[:method],
+      code_challenge: pkce[:challenge],
+    )
 
     begin
-      Launchy.open(authorization_uri)
-  rescue
-    # NOTE: ignore any exception, as the URL is printed above and may be
-    #       opened manually
-    puts "Cannot open browser automatically, please click on the link below:"
-    puts ""
-    puts authorization_uri
+      if ENV["SIGSTORE_TEST"]
+        Faraday.get("#{redirect_uri}/?code=DUMMY&state=#{session[:state]}")
+      else
+        Launchy.open(authorization_uri)
+      end
+    rescue
+      # NOTE: ignore any exception, as the URL is printed above and may be
+      #       opened manually
+      say "Cannot open browser automatically, please click on the link below:"
+      say ""
+      say authorization_uri
     end
 
     webserv.join
@@ -152,8 +159,8 @@ class Gem::Sigstore::OpenID
   def verify_token(access_token, public_keys, config, nonce)
     begin
       decoded_access_token = JSON::JWT.decode(access_token.to_s,public_keys)
-  rescue JSON::JWS::VerificationFailed => e
-    abort 'JWT Verification Failed: ' + e.to_s
+    rescue JSON::JWS::VerificationFailed => e
+      abort 'JWT Verification Failed: ' + e.to_s
     else #success
       token = JSON.parse(decoded_access_token.to_json)
     end
