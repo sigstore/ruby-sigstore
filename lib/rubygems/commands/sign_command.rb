@@ -21,6 +21,7 @@ require 'rubygems/command'
 require "rubygems/sigstore/config"
 require "rubygems/sigstore/crypto"
 require "rubygems/sigstore/fulcio_api"
+require "rubygems/sigstore/rekor_api"
 require "rubygems/sigstore/openid"
 require "rubygems/sigstore/gemfile"
 require "rubygems/sigstore/cert_provider"
@@ -55,7 +56,7 @@ class Gem::Commands::SignCommand < Gem::Command
       gemfile: gemfile,
       config: Gem::Sigstore::Config.read
     ).run
-    pp log_entry_url(rekor_entry)
+    say log_entry_url(rekor_entry)
   end
 
   private

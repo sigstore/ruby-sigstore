@@ -1,12 +1,13 @@
 require "rubygems/sigstore/rekord_entry"
 
 class Gem::Sigstore::GemVerifier
+  include Gem::UserInteraction
+
   Data = Struct.new(:digest, :signature, :raw)
 
-  def initialize(gemfile:, config:, io: $stdout)
+  def initialize(gemfile:, config:)
     @gemfile = gemfile
     @config = config
-    @io = io
   end
 
   def run
@@ -16,16 +17,16 @@ class Gem::Sigstore::GemVerifier
     rekords = rekord_entries.select { |entry| valid_signature?(entry, gemfile) }
 
     if rekords.empty?
-      io.puts "No valid signatures found for digest #{gemfile.digest}"
+      say "No valid signatures found for digest #{gemfile.digest}"
     else
-      io.puts ":noice:"
+      say ":noice:"
       print_signers(rekords)
     end
   end
 
   private
 
-  attr_reader :gemfile, :config, :io
+  attr_reader :gemfile, :config
 
   def valid_signature?(rekord_entry, gemfile)
     public_key = rekord_entry.signer_public_key
@@ -42,11 +43,11 @@ class Gem::Sigstore::GemVerifier
     end
 
     unless maintainers.empty?
-      io.puts "Signed by maintainer#{maintainers.size == 1 ? '' : 's'}: #{email_list(maintainers)}"
+      say "Signed by maintainer#{maintainers.size == 1 ? '' : 's'}: #{email_list(maintainers)}"
     end
 
     unless others.empty?
-      io.puts "Signed by non-maintainer#{others.size == 1 ? '' : 's'}: #{email_list(others)}"
+      say "Signed by non-maintainer#{others.size == 1 ? '' : 's'}: #{email_list(others)}"
     end
   end
 

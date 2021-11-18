@@ -1,10 +1,11 @@
 class Gem::Sigstore::GemSigner
+  include Gem::UserInteraction
+
   Data = Struct.new(:digest, :signature, :raw)
 
-  def initialize(gemfile:, config:, io: $stdout)
+  def initialize(gemfile:, config:)
     @gemfile = gemfile
     @config = config
-    @io = io
   end
 
   def run
@@ -13,10 +14,10 @@ class Gem::Sigstore::GemSigner
 
     yield if block_given?
 
-    io.puts "Fulcio certificate chain"
-    io.puts cert
-    io.puts
-    io.puts "Sending gem digest, signature & certificate chain to transparency log."
+    say "Fulcio certificate chain"
+    say cert
+    say
+    say "Sending gem digest, signature & certificate chain to transparency log."
 
     Gem::Sigstore::FileSigner.new(
       file: gemfile,
@@ -28,5 +29,5 @@ class Gem::Sigstore::GemSigner
 
   private
 
-  attr_reader :gemfile, :config, :io
+  attr_reader :gemfile, :config
 end
