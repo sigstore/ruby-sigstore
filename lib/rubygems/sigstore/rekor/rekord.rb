@@ -1,9 +1,6 @@
 require "rubygems/sigstore/cert_chain"
 
-class Gem::Sigstore::RekordEntry
-  def initialize(entry)
-    @entry = entry
-  end
+class Gem::Sigstore::Rekor::Rekord < Gem::Sigstore::Rekor::LogEntry
 
   def signature
     @signature ||= begin
@@ -26,10 +23,6 @@ class Gem::Sigstore::RekordEntry
   end
 
   private
-
-  def body
-    @body ||= JSON.parse(Base64.decode64(@entry["body"]))
-  end
 
   def cert
     @cert ||= begin

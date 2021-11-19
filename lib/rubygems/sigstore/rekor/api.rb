@@ -1,7 +1,7 @@
 require "faraday_middleware"
 require "openssl"
 
-class Gem::Sigstore::RekorApi
+class Gem::Sigstore::Rekor::Api
   def initialize(host:)
     @host = host
   end
@@ -47,7 +47,7 @@ class Gem::Sigstore::RekorApi
         raise "Unexpected response from GET api/v1/log/entries/#{uuid}:\n #{entry_response}"
       end
 
-      entry_response.body
+      Gem::Sigstore::Rekor::LogEntry.from(entry_response.body)
     end
   end
 

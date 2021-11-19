@@ -22,7 +22,7 @@ class Gem::Sigstore::GemSigner
     Gem::Sigstore::FileSigner.new(
       file: gemfile,
       pkey: pkey,
-      transparency_log: Gem::Sigstore::RekorApi.new(host: config.rekor_host),
+      transparency_log: Gem::Sigstore::Rekor::Api.new(host: config.rekor_host),
       cert: cert
     ).run
   end

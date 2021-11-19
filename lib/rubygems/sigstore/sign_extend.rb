@@ -26,7 +26,7 @@ require "rubygems/sigstore/config"
 require 'rubygems/sigstore/options'
 require "rubygems/sigstore/crypto"
 require "rubygems/sigstore/fulcio_api"
-require "rubygems/sigstore/rekor_api"
+require "rubygems/sigstore/rekor"
 require "rubygems/sigstore/openid"
 require "rubygems/sigstore/gemfile"
 require "rubygems/sigstore/cert_provider"
