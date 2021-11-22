@@ -12,7 +12,7 @@ class Gem::Sigstore::GemVerifier
 
   def run
     rekor_api = Gem::Sigstore::RekorApi.new(host: config.rekor_host)
-    entries = rekor_api.where(data_digest: gemfile.digest)
+    entries = rekor_api.where(data_digest: gemfile.digest) # TODO: we should only pass on the entries where body.kind == "rekord"
     rekord_entries = entries.map { |entry| Gem::Sigstore::RekordEntry.new(entry.values.first) }
     rekords = rekord_entries.select { |entry| valid_signature?(entry, gemfile) }
 
