@@ -17,7 +17,6 @@ module Gem
   end
 end
 
-require "rubygems/commands/verify_command"
 require "rubygems/sigstore/config"
 require "rubygems/sigstore/gemfile"
 require "rubygems/sigstore/gem_verifier"
