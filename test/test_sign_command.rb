@@ -16,7 +16,7 @@ class TestSignCommand < Gem::TestCase
     stub_sigstore_auth_create_token
     stub_sigstore_auth_get_keys
     stub_fulcio_create_signing_cert
-    stub_rekor_create_log_entry(gem_digest(@gem_path))
+    stub_rekor_create_rekord
   end
 
   def test_sign

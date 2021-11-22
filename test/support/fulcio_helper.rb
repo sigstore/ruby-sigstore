@@ -34,12 +34,12 @@ module FulcioHelper
         {
           status: 201,
           headers: {},
-          body: build_fulcio_cert_chain(signing_cert_key(request)),
+          body: build_fulcio_cert_chain(signing_cert_key(request)).join,
         }.merge(returning)
       end
   end
 
-  def build_fulcio_cert_chain(public_signing_key)
+  def build_fulcio_cert_chain(public_signing_key, not_before: Time.now)
     ef = OpenSSL::X509::ExtensionFactory.new
 
     root_key = OpenSSL::PKey::RSA.new(1024)
@@ -59,19 +59,19 @@ module FulcioHelper
 
     leaf_cert = OpenSSL::X509::Certificate.new
     leaf_cert.issuer = OpenSSL::X509::Name.parse(root_subject)
-    leaf_cert.not_before = Time.now
-    leaf_cert.not_after = Time.now + 10.minutes
+    leaf_cert.not_before = not_before
+    leaf_cert.not_after = not_before + 10.minutes
     leaf_cert.public_key = public_signing_key
     leaf_cert.serial = 0x0
     leaf_cert.version = 2
     leaf_cert.add_extension(ef.create_extension("basicConstraints","CA:TRUE",true))
     leaf_cert.add_extension(ef.create_extension("keyUsage","digitalSignature", true))
     leaf_cert.add_extension(ef.create_extension("extendedKeyUsage","codeSigning", true))
-    # TODO leaf_cert.add_extension(ef.create_extension("authorityInfoAccess","CA Issuers - URI:http://privateca-content-603fe7e7-0000-2227-bf75-f4f5e80d2954.storage.googleapis.com/ca36a1e96242b9fcb146/ca.crt", true))
+    leaf_cert.add_extension(ef.create_extension("authorityInfoAccess","caIssuers;URI:http://some-ca-authority.org/ca.crt", true))
     leaf_cert.add_extension(ef.create_extension("subjectAltName","email:someone@example.org", true))
     leaf_cert.sign(root_key, OpenSSL::Digest.new("SHA256"))
 
-    [root_cert, leaf_cert].map(&:to_pem).join
+    [root_cert, leaf_cert].map(&:to_pem)
   end
 
   def signing_cert_key(request)

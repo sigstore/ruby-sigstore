@@ -3,6 +3,11 @@ require 'rubygems/package'
 require 'digest'
 require 'fileutils'
 
+module Gem
+  module Sigstore
+  end
+end
+
 class Gem::Sigstore::Gemfile
   class << self
     def find_gemspec(glob = "*.gemspec")
@@ -42,6 +47,10 @@ class Gem::Sigstore::Gemfile
   end
 
   def maintainer?(email)
-    Array(spec.email).include?(email)
+    maintainers.include?(email)
+  end
+
+  def maintainers
+    Array(spec.email)
   end
 end
