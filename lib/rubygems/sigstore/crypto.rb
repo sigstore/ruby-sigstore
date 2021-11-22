@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Gem
-  module Sigstore
-  end
-end
-
 require 'base64'
 require 'openssl'
 

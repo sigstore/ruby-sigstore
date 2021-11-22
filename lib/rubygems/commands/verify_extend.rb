@@ -13,8 +13,7 @@
 # limitations under the License.
 
 require 'rubygems/command_manager'
-require "rubygems/sigstore/config"
-require 'rubygems/sigstore/options'
+require 'rubygems/sigstore'
 
 Gem::CommandManager.instance.register_command :verify
 

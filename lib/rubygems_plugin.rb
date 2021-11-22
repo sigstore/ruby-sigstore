@@ -13,8 +13,11 @@
 # limitations under the License.
 
 require 'rubygems/command_manager'
-require 'rubygems/sigstore/sign_extend'
-require 'rubygems/sigstore/verify_extend'
+require 'rubygems/sigstore'
+require 'rubygems/commands/sign_command'
+require 'rubygems/commands/sign_extend'
+require 'rubygems/commands/verify_command'
+require 'rubygems/commands/verify_extend'
 
 Gem::CommandManager.instance.register_command :sign
 Gem::CommandManager.instance.register_command :verify

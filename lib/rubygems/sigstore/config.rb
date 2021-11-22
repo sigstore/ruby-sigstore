@@ -14,11 +14,6 @@
 
 require 'config'
 
-module Gem
-  module Sigstore
-  end
-end
-
 class Gem::Sigstore::Config
   class << self
     def read
