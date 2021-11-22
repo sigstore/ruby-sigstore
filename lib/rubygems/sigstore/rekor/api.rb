@@ -1,5 +1,6 @@
 require "faraday_middleware"
 require "openssl"
+require "rubygems/sigstore/rekor/log_entry"
 
 class Gem::Sigstore::Rekor::Api
   def initialize(host:)

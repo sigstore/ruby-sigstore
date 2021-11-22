@@ -1,3 +1,9 @@
+require "rubygems/user_interaction"
+require "rubygems/sigstore/crypto"
+require "rubygems/sigstore/cert_provider"
+require "rubygems/sigstore/file_signer"
+require "rubygems/sigstore/rekor"
+
 class Gem::Sigstore::GemSigner
   include Gem::UserInteraction
 

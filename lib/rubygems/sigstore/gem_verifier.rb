@@ -1,3 +1,4 @@
+require "rubygems/user_interaction"
 require "rubygems/sigstore/rekor"
 
 class Gem::Sigstore::GemVerifier

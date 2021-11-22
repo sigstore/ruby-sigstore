@@ -1,4 +1,5 @@
 require "rubygems/sigstore/cert_chain"
+require "rubygems/sigstore/rekor/log_entry"
 
 class Gem::Sigstore::Rekor::Rekord < Gem::Sigstore::Rekor::LogEntry
 
