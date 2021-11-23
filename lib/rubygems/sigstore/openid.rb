@@ -13,7 +13,7 @@
 # limitations under the License.
 
 require 'rubygems/sigstore/config'
-require 'rubygems/sigstore/crypto'
+require 'rubygems/sigstore/pkey'
 
 require 'base64'
 require 'cgi'
