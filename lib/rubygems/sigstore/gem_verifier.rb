@@ -1,4 +1,5 @@
-require "rubygems/sigstore/rekord_entry"
+require "rubygems/user_interaction"
+require "rubygems/sigstore/rekor"
 
 class Gem::Sigstore::GemVerifier
   include Gem::UserInteraction
@@ -11,16 +12,17 @@ class Gem::Sigstore::GemVerifier
   end
 
   def run
-    rekor_api = Gem::Sigstore::RekorApi.new(host: config.rekor_host)
-    entries = rekor_api.where(data_digest: gemfile.digest) # TODO: we should only pass on the entries where body.kind == "rekord"
-    rekord_entries = entries.map { |entry| Gem::Sigstore::RekordEntry.new(entry.values.first) }
-    rekords = rekord_entries.select { |entry| valid_signature?(entry, gemfile) }
+    rekor_api = Gem::Sigstore::Rekor::Api.new(host: config.rekor_host)
+    log_entries = rekor_api.where(data_digest: gemfile.digest)
+    rekords = log_entries.select { |entry| entry.kind == :rekord }
 
-    if rekords.empty?
+    valid_signature_rekords = rekords.select { |rekord| valid_signature?(rekord, gemfile) }
+
+    if valid_signature_rekords.empty?
       say "No valid signatures found for digest #{gemfile.digest}"
     else
       say ":noice:"
-      print_signers(rekords)
+      print_signers(valid_signature_rekords)
     end
   end
 
@@ -28,10 +30,10 @@ class Gem::Sigstore::GemVerifier
 
   attr_reader :gemfile, :config
 
-  def valid_signature?(rekord_entry, gemfile)
-    public_key = rekord_entry.signer_public_key
+  def valid_signature?(rekord, gemfile)
+    public_key = rekord.signer_public_key
     digest = gemfile.digest
-    signature = rekord_entry.signature
+    signature = rekord.signature
     content = gemfile.content
 
     public_key.verify(digest, signature, content)
