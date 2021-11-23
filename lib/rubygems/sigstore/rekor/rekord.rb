@@ -33,4 +33,3 @@ class Gem::Sigstore::Rekor::Rekord < Gem::Sigstore::Rekor::LogEntry
     end
   end
 end
-

@@ -22,4 +22,3 @@ class Gem::Sigstore::FileSigner
     @signature ||= @pkey.private_key.sign @file.digest, @file.content
   end
 end
-

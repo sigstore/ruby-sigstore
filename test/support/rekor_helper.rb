@@ -5,8 +5,8 @@ module RekorHelper
   include UrlHelper
   include FulcioHelper
 
-  REKOR_BASE_URL = 'https://rekor.sigstore.dev/'
-  REKOR_FAKE_CA_BASE_URL = 'http://some-ca-authority.org/'
+  REKOR_BASE_URL = 'https://rekor.sigstore.dev/'.freeze
+  REKOR_FAKE_CA_BASE_URL = 'http://some-ca-authority.org/'.freeze
 
   def rekor_api_url(*path, **kwargs)
     url_regex(REKOR_BASE_URL, 'api', 'v1', path, **kwargs)
@@ -34,23 +34,23 @@ module RekorHelper
                 content: BASE64_ENCODED_PATTERN,
                 publicKey: hash_including({
                   content: BASE64_ENCODED_PATTERN,
-                })
+                }),
               }),
               data: hash_including({
                 content: BASE64_ENCODED_PATTERN,
                 hash: hash_including({
                   algorithm: "sha256",
-                  value: gem.digest
-                })
-              })
-            })
+                  value: gem.digest,
+                }),
+              }),
+            }),
           }.merge(body) # deep_merge is incompatible with nested hash_including()
         )
       )
       .to_return_json(
         build_rekord_entry(returning[:body] || {}),
         {
-          status: 201
+          status: 201,
         }
       )
   end
@@ -63,9 +63,9 @@ module RekorHelper
         logID: "dummy rekord logID",
         logIndex: 864991,
         verification: {
-          signedEntryTimestamp: "dummy timestamp signature"
-        }
-      }
+          signedEntryTimestamp: "dummy timestamp signature",
+        },
+      },
     }.deep_merge(options)
   end
 
@@ -117,9 +117,9 @@ module RekorHelper
         logID: "dummy rekord logID",
         logIndex: 864991,
         verification: {
-          signedEntryTimestamp: "dummy timestamp signature"
-        }
-      }
+          signedEntryTimestamp: "dummy timestamp signature",
+        },
+      },
     }.deep_merge(log_entry_options)
   end
 
@@ -137,16 +137,16 @@ module RekorHelper
           "hash": {
             "algorithm": "sha256",
             "value": gem.digest,
-          }
+          },
         },
         "signature": {
           "content": Base64.encode64(pkey.private_key.sign(OpenSSL::Digest.new('SHA256'), gem.content)),
           "format": "x509",
           "publicKey": {
             "content": Base64.encode64(cert_chain.last),
-          }
-        }
-      }
+          },
+        },
+      },
     }.deep_merge(rekord_options)
   end
 

@@ -2,7 +2,7 @@ module FulcioHelper
   include UrlHelper
   include SigstoreAuthHelper
 
-  FULCIO_BASE_URL = 'https://fulcio.sigstore.dev/'
+  FULCIO_BASE_URL = 'https://fulcio.sigstore.dev/'.freeze
 
   def fulcio_api_url(*path, **kwargs)
     url_regex(FULCIO_BASE_URL, 'api', 'v1', path, **kwargs)
