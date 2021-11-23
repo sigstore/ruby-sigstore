@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Gem
-  module Sigstore
-  end
-end
-
 require 'base64'
 require 'openssl'
 
@@ -37,19 +32,3 @@ class Gem::Sigstore::PKey
     @private_key ||= OpenSSL::PKey::RSA.generate(2048)
   end
 end
-
-# class Crypto
-#     def initialize; end
-
-#     def generate_keys
-#         key = OpenSSL::PKey::EC.new('prime256v1').generate_key
-#         pkey = OpenSSL::PKey::EC.new(key.public_key.group)
-#         pkey.public_key = key.public_key
-#         return [key, pkey, Base64.encode64(pkey.to_der)]
-#     end
-
-#     def sign_proof(priv_key, email)
-#         proof = priv_key.sign(OpenSSL::Digest::SHA256.new, email)
-#         return Base64.encode64(proof)
-#     end
-# end

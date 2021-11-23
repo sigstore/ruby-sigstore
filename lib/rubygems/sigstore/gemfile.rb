@@ -3,11 +3,6 @@ require 'rubygems/package'
 require 'digest'
 require 'fileutils'
 
-module Gem
-  module Sigstore
-  end
-end
-
 class Gem::Sigstore::Gemfile
   class << self
     def find_gemspec(glob = "*.gemspec")

@@ -12,26 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Gem
-  module Sigstore
-  end
-end
-
 require 'digest'
 require 'fileutils'
 require 'openssl'
 require 'rubygems/package'
 require 'rubygems/command_manager'
-require "rubygems/sigstore/config"
-require 'rubygems/sigstore/options'
-require "rubygems/sigstore/crypto"
-require "rubygems/sigstore/fulcio_api"
-require "rubygems/sigstore/rekor"
-require "rubygems/sigstore/openid"
-require "rubygems/sigstore/gemfile"
-require "rubygems/sigstore/cert_provider"
-require "rubygems/sigstore/file_signer"
-require "rubygems/sigstore/gem_signer"
+require 'rubygems/sigstore'
 
 Gem::CommandManager.instance.register_command :sign
 

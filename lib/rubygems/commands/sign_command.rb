@@ -12,26 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Gem
-  module Sigstore
-  end
-end
-
 require 'rubygems/command'
-require "rubygems/sigstore/config"
-require "rubygems/sigstore/crypto"
-require "rubygems/sigstore/fulcio_api"
-require "rubygems/sigstore/rekor"
-require "rubygems/sigstore/openid"
-require "rubygems/sigstore/gemfile"
-require "rubygems/sigstore/cert_provider"
-require "rubygems/sigstore/file_signer"
-require "rubygems/sigstore/gem_signer"
+require 'rubygems/sigstore'
 
 require 'json/jwt'
-require "launchy"
-require "openid_connect"
-require "socket"
+require 'launchy'
+require 'openid_connect'
+require 'socket'
 
 class Gem::Commands::SignCommand < Gem::Command
   def initialize

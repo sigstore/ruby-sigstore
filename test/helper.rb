@@ -3,11 +3,13 @@ require 'webmock/test_unit'
 require 'rubygems/mock_gem_ui'
 require 'json/jwt'
 
-require_relative 'support/webmock_helper'
-require_relative 'support/url_helper'
-require_relative 'support/sigstore_auth_helper'
-require_relative 'support/fulcio_helper'
-require_relative 'support/rekor_helper'
+require 'rubygems/sigstore'
+
+require 'support/webmock_helper'
+require 'support/url_helper'
+require 'support/sigstore_auth_helper'
+require 'support/fulcio_helper'
+require 'support/rekor_helper'
 
 WebMock.disable_net_connect!(allow_localhost: true)
 

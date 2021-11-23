@@ -1,5 +1,5 @@
 require 'rubygems/sigstore/gemfile'
-require 'rubygems/sigstore/crypto'
+require 'rubygems/sigstore/pkey'
 
 module RekorHelper
   include UrlHelper

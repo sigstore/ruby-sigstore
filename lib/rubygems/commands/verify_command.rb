@@ -12,14 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Gem
-  module Sigstore
-  end
-end
-
-require "rubygems/sigstore/config"
-require "rubygems/sigstore/gemfile"
-require "rubygems/sigstore/gem_verifier"
+require 'rubygems/command'
+require 'rubygems/sigstore'
 
 class Gem::Commands::VerifyCommand < Gem::Command
   def initialize
