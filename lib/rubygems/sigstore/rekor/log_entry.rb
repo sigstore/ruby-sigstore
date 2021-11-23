@@ -1,5 +1,4 @@
 class Gem::Sigstore::Rekor::LogEntry
-
   def self.from(entry_response)
     uuid = entry_response.keys.first
     entry = entry_response[uuid]

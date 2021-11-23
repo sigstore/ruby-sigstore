@@ -2,7 +2,6 @@ require "rubygems/sigstore/cert_chain"
 require "rubygems/sigstore/rekor/log_entry"
 
 class Gem::Sigstore::Rekor::Rekord < Gem::Sigstore::Rekor::LogEntry
-
   def signature
     @signature ||= begin
       signature = Base64.decode64(body.dig("spec", "signature", "content"))
@@ -33,4 +32,3 @@ class Gem::Sigstore::Rekor::Rekord < Gem::Sigstore::Rekor::LogEntry
     end
   end
 end
-

@@ -1,7 +1,7 @@
 module SigstoreAuthHelper
   include UrlHelper
 
-  SIGSTORE_OAUTH2_BASE_URL = 'https://oauth2.sigstore.dev/'
+  SIGSTORE_OAUTH2_BASE_URL = 'https://oauth2.sigstore.dev/'.freeze
 
   def sigstore_auth_url(*path, **kwargs)
     url_regex(SIGSTORE_OAUTH2_BASE_URL, 'auth', path, **kwargs)
@@ -33,7 +33,7 @@ module SigstoreAuthHelper
       code_challenge_methods_supported: ["S256", "plain"],
       scopes_supported: ["openid", "email", "groups", "profile", "offline_access"],
       token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post"],
-      claims_supported: ["iss", "sub", "aud", "iat", "exp", "email", "email_verified", "locale", "name", "preferred_username", "at_hash"]
+      claims_supported: ["iss", "sub", "aud", "iat", "exp", "email", "email_verified", "locale", "name", "preferred_username", "at_hash"],
     }.merge(options)
   end
 
@@ -47,7 +47,7 @@ module SigstoreAuthHelper
     stub_request(:post, sigstore_auth_url('token'))
       .with(
         headers: {
-            authorization: 'Basic c2lnc3RvcmU6', #u: sigstore, no password.  From settings.yml
+          authorization: 'Basic c2lnc3RvcmU6', #u: sigstore, no password.  From settings.yml
             content_type: 'application/x-www-form-urlencoded',
         }.merge(headers),
         body: hash_including(
@@ -83,7 +83,7 @@ module SigstoreAuthHelper
 
   def build_sigstore_auth_keys(options)
     {
-      keys: [access_token_jwk]
+      keys: [access_token_jwk],
     }.merge(options)
   end
 

@@ -11,9 +11,9 @@ class Gem::Sigstore::FulcioApi
     connection.post("/api/v1/signingCert", {
       publicKey: {
         content: Base64.encode64(pub_key),
-        algorithm: "ecdsa"
+        algorithm: "ecdsa",
       },
-      signedEmailAddress: Base64.encode64(proof)
+      signedEmailAddress: Base64.encode64(proof),
     }).body
   end
 

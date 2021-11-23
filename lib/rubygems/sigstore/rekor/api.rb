@@ -65,4 +65,3 @@ class Gem::Sigstore::Rekor::Api
     end
   end
 end
-

@@ -21,11 +21,10 @@ module Gem
     @ui = Gem::MockGemUi.new
   end
 
-
   class Gem::TestCase < Test::Unit::TestCase
     include Gem::DefaultUserInteraction
 
-    BASE64_ENCODED_PATTERN = /[a-zA-Z0-9\+\/=\\]/
+    BASE64_ENCODED_PATTERN = /[a-zA-Z0-9\+\/=\\]/.freeze
 
     def setup
       @back_ui = Gem::DefaultUserInteraction.ui

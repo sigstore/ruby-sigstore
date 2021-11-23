@@ -14,9 +14,9 @@ class Gem::Sigstore::GemVerifier
   def run
     rekor_api = Gem::Sigstore::Rekor::Api.new(host: config.rekor_host)
     log_entries = rekor_api.where(data_digest: gemfile.digest)
-    rekords = log_entries.select { |entry| entry.kind == :rekord }
+    rekords = log_entries.select {|entry| entry.kind == :rekord }
 
-    valid_signature_rekords = rekords.select { |rekord| valid_signature?(rekord, gemfile) }
+    valid_signature_rekords = rekords.select {|rekord| valid_signature?(rekord, gemfile) }
 
     if valid_signature_rekords.empty?
       say "No valid signatures found for digest #{gemfile.digest}"
