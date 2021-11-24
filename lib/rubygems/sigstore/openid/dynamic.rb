@@ -29,6 +29,18 @@ class Gem::Sigstore::OpenID::Dynamic
     @priv_key = priv_key
   end
 
+  def proof
+    get_token unless defined?(@proof)
+    @proof
+  end
+
+  def token
+    get_token unless defined?(@token)
+    @token.to_s
+  end
+
+  private
+
   def get_token()
     config = Gem::Sigstore::Config.read
     session = {}
@@ -135,11 +147,9 @@ class Gem::Sigstore::OpenID::Dynamic
     token = verify_token(access_token, provider_public_keys, config, session[:nonce])
 
     pkey = Gem::Sigstore::PKey.new(private_key: @priv_key)
-    proof = pkey.sign_proof(token["email"])
-    return proof, access_token
+    @proof = pkey.sign_proof(token["email"])
+    @token = access_token
   end
-
-  private
 
   def generate_pkce()
     pkce = {}
