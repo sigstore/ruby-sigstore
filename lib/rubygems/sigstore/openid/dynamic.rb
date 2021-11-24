@@ -41,7 +41,7 @@ class Gem::Sigstore::OpenID::Dynamic
 
   private
 
-  def get_token()
+  def get_token
     config = Gem::Sigstore::Config.read
     session = {}
     session[:state] = SecureRandom.hex(16)
@@ -151,14 +151,14 @@ class Gem::Sigstore::OpenID::Dynamic
     @token = access_token
   end
 
-  def generate_pkce()
+  def generate_pkce
     pkce = {}
     pkce[:method] = "S256"
     # generate 43 <= x <= 128 character random string; the length below will generate a 2x hex length string
     pkce[:value] = SecureRandom.hex(24)
     # compute SHA256 hash and base64-urlencode hash
     pkce[:challenge] = Base64.urlsafe_encode64(Digest::SHA256.digest(pkce[:value]), padding:false)
-    return pkce
+    pkce
   end
 
   def verify_token(access_token, public_keys, config, nonce)
@@ -197,6 +197,6 @@ class Gem::Sigstore::OpenID::Dynamic
       abort 'Email address in OIDC token has not been verified by provider'
     end
 
-    return token
+    token
   end
 end
