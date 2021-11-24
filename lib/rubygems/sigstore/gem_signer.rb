@@ -16,7 +16,8 @@ class Gem::Sigstore::GemSigner
 
   def run
     pkey = Gem::Sigstore::PKey.new
-    cert = Gem::Sigstore::CertProvider.new(config: config, pkey: pkey).run
+    oidp = Gem::Sigstore::OpenID::Dynamic.new(pkey.private_key)
+    cert = Gem::Sigstore::CertProvider.new(config: config, pkey: pkey, oidp: oidp).run
 
     yield if block_given?
 
