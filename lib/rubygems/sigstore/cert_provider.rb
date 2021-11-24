@@ -1,16 +1,19 @@
 class Gem::Sigstore::CertProvider
-  def initialize(config:, pkey:)
+  def initialize(config:, pkey:, oidp:)
     @config = config
     @pkey = pkey
+    @oidp = oidp
   end
 
   def run
-    proof, access_token = Gem::Sigstore::OpenID.new(pkey.private_key).get_token
-    fulcio_api = Gem::Sigstore::FulcioApi.new(token: access_token, host: config.fulcio_host)
-    fulcio_api.create(proof, pkey.public_key.to_der)
+    fulcio_api.create(pkey.public_key.to_der)
   end
 
   private
 
-  attr_reader :config, :pkey
+  attr_reader :config, :pkey, :oidp
+
+  def fulcio_api
+    Gem::Sigstore::FulcioApi.new(oidp: oidp, host: config.fulcio_host)
+  end
 end
