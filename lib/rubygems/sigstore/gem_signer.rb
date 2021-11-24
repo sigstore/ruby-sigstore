@@ -15,9 +15,7 @@ class Gem::Sigstore::GemSigner
   end
 
   def run
-    pkey = Gem::Sigstore::PKey.new
-    oidp = Gem::Sigstore::OpenID::Dynamic.new(pkey.private_key)
-    cert = Gem::Sigstore::CertProvider.new(config: config, pkey: pkey, oidp: oidp).run
+    cert = cert_provider.run
 
     yield if block_given?
 
@@ -26,15 +24,30 @@ class Gem::Sigstore::GemSigner
     say
     say "Sending gem digest, signature & certificate chain to transparency log."
 
-    Gem::Sigstore::FileSigner.new(
-      file: gemfile,
-      pkey: pkey,
-      transparency_log: Gem::Sigstore::Rekor::Api.new(host: config.rekor_host),
-      cert: cert
-    ).run
+    gemfile_signer(cert).run
   end
 
   private
 
   attr_reader :gemfile, :config
+
+  def cert_provider
+    Gem::Sigstore::CertProvider.new(config: config, pkey: pkey, oidp: oidp)
+  end
+
+  def pkey
+    @pkey ||= Gem::Sigstore::PKey.new
+  end
+
+  def oidp
+    @oidp ||= Gem::Sigstore::OpenID::Dynamic.new(pkey.private_key)
+  end
+
+  def gemfile_signer(cert)
+    Gem::Sigstore::FileSigner.new(file: gemfile, pkey: pkey, transparency_log: rekor_api, cert: cert)
+  end
+
+  def rekor_api
+    Gem::Sigstore::Rekor::Api.new(host: config.rekor_host)
+  end
 end
