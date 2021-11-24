@@ -1,7 +1,5 @@
 class Gem::Sigstore::Rekor::LogEntry
-  def self.from(entry_response)
-    uuid = entry_response.keys.first
-    entry = entry_response[uuid]
+  def self.from(uuid, entry)
     body = encoded_body_to_hash(entry["body"])
 
     case body["kind"]

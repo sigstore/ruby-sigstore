@@ -5,8 +5,7 @@ module RekorHelper
   include UrlHelper
   include FulcioHelper
 
-  REKOR_BASE_URL = 'https://rekor.sigstore.dev/'.freeze
-  REKOR_FAKE_CA_BASE_URL = 'http://some-ca-authority.org/'.freeze
+  REKOR_BASE_URL = 'https://rekor.sigstore.dev'.freeze
 
   def rekor_api_url(*path, **kwargs)
     url_regex(REKOR_BASE_URL, 'api', 'v1', path, **kwargs)
@@ -69,14 +68,14 @@ module RekorHelper
     }.deep_merge(options)
   end
 
-  def rekor_index_retrieve_url(uuid)
+  def rekor_index_retrieve_url
     rekor_api_url('index', 'retrieve')
   end
 
-  def stub_rekor_search_index_by_digest(gem_path: @gem_path, uuid: "dummy_entry_uuid", body: {}, returning: nil)
+  def stub_rekor_search_index_by_digest(gem_path: @gem_path, body: {}, returning: nil)
     gem = Gem::Sigstore::Gemfile.new(gem_path)
 
-    stub_request(:post, rekor_index_retrieve_url(uuid))
+    stub_request(:post, rekor_index_retrieve_url)
       .with(
         headers: {
           content_type: 'application/json',
@@ -88,31 +87,41 @@ module RekorHelper
       .to_return_json(returning || ["dummy_entry_uuid"])
   end
 
-  def rekor_log_entry_url(uuid)
-    rekor_api_url('log', 'entries', uuid)
+  def rekor_log_entries_retrieve_url
+    rekor_api_url('log', 'entries', 'retrieve')
   end
 
-  def stub_rekor_get_rekord_by_uuid(
-    gem_path: @gem_path,
-    uuid: "dummy_entry_uuid",
-    log_entry_options: {},
-    rekord_options: {}
+  def stub_rekor_get_rekords_by_uuid(
+    uuids: ["dummy_entry_uuid"],
+    returning: {
+      "dummy_entry_uuid" => {
+        log_entry_options: {},
+        rekord_options: {},
+        cert_options: {},
+        gem_path: @gem_path,
+      },
+    }
   )
-    stub_request(:get, rekor_log_entry_url(uuid))
+    stub_request(:post, rekor_log_entries_retrieve_url)
+      .with(
+        body: {
+          entryUUIDs: uuids,
+        }
+      )
       .to_return_json(
-        build_rekord_log_entry(
-          uuid: uuid,
-          log_entry_options: log_entry_options,
-          rekord_options: rekord_options,
-          gem_path: gem_path
-        )
+        returning.map do |uuid, options|
+          build_rekord_log_entry(
+            uuid: uuid,
+            **options
+          )
+        end
       )
   end
 
-  def build_rekord_log_entry(uuid:, log_entry_options:, rekord_options:, gem_path:)
+  def build_rekord_log_entry(uuid:, log_entry_options: {}, rekord_options: {}, cert_options: {}, gem_path: @gem_path)
     {
       uuid => {
-        body: Base64.encode64(build_rekord(rekord_options, gem_path).to_json),
+        body: Base64.encode64(build_rekord(rekord_options, cert_options, gem_path).to_json),
         integratedTime: 1637154947,
         logID: "dummy rekord logID",
         logIndex: 864991,
@@ -123,10 +132,10 @@ module RekorHelper
     }.deep_merge(log_entry_options)
   end
 
-  def build_rekord(rekord_options, gem_path)
+  def build_rekord(rekord_options, cert_options, gem_path)
     gem = Gem::Sigstore::Gemfile.new(gem_path)
     pkey = Gem::Sigstore::PKey.new
-    cert_chain = build_fulcio_cert_chain(pkey.public_key)
+    cert_chain = build_fulcio_cert_chain(pkey.public_key, signing_cert_options: cert_options)
     stub_get_ca_certificate(certificate: cert_chain.first)
 
     {
@@ -151,7 +160,7 @@ module RekorHelper
   end
 
   def ca_authority_url(*path, **kwargs)
-    url_regex(REKOR_FAKE_CA_BASE_URL, path, **kwargs)
+    url_regex(FULCIO_FAKE_CA_BASE_URL, path, **kwargs)
   end
 
   def stub_get_ca_certificate(certificate:, returning: {})
