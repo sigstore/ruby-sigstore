@@ -28,6 +28,15 @@ Or install it yourself as:
 
 `gem sign foo.gem`
 
+### Identity Tokens
+
+In automated environments, gem also supports directly using OIDC Identity Tokens from specific issuers.
+These can be supplied on the command line with the `--identity-token` flag.
+
+```shell
+$ gem sign sign --identity-token=$(gcloud auth print-identity-token)
+```
+
 ### Verify an existing gem file
 
 `gem verify foo.gem`

@@ -2,6 +2,7 @@ require 'test/unit'
 require 'webmock/test_unit'
 require 'rubygems/mock_gem_ui'
 require 'json/jwt'
+require 'byebug'
 
 require 'rubygems/sigstore'
 

@@ -36,6 +36,24 @@ class TestSignCommand < Gem::TestCase
     assert_equal [], output
   end
 
+  def test_static_sign
+    @cmd.options[:args] = [@gem_path]
+    @cmd.options[:identity_token] = access_token
+
+    use_ui @ui do
+      @cmd.execute
+    end
+
+    output = @ui.output.split "\n"
+    assert_equal "Fulcio certificate chain", output.shift
+    assert_certificate(output) # root certificate
+    assert_certificate(output) # leaf certificate
+    assert_empty output.shift
+    assert_equal "Sending gem digest, signature & certificate chain to transparency log.", output.shift
+    assert_equal "https://rekor.sigstore.dev/api/v1/log/entries/dummy_entry_uuid", output.shift
+    assert_equal [], output
+  end
+
   def assert_certificate(output)
     assert_equal "-----BEGIN CERTIFICATE-----", output.shift
     assert_match BASE64_ENCODED_PATTERN, output.shift until output.first == "-----END CERTIFICATE-----"
