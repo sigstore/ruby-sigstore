@@ -2,7 +2,8 @@ module FulcioHelper
   include UrlHelper
   include SigstoreAuthHelper
 
-  FULCIO_BASE_URL = 'https://fulcio.sigstore.dev/'.freeze
+  FULCIO_BASE_URL = 'https://fulcio.sigstore.dev'.freeze
+  FULCIO_FAKE_CA_BASE_URL = 'http://ca.example.org.org'.freeze
 
   def fulcio_api_url(*path, **kwargs)
     url_regex(FULCIO_BASE_URL, 'api', 'v1', path, **kwargs)
@@ -39,39 +40,48 @@ module FulcioHelper
       end
   end
 
-  def build_fulcio_cert_chain(public_signing_key, not_before: Time.now)
+  def build_fulcio_cert_chain(public_signing_key, signing_cert_options: {})
     ef = OpenSSL::X509::ExtensionFactory.new
 
-    root_key = OpenSSL::PKey::RSA.new(1024)
-    root_subject = "/O=sigstore.dev/CN=sigstore"
+    issuing_key = OpenSSL::PKey::RSA.new(1024)
+    issuer_subject = "/O=sigstore.dev/CN=sigstore"
 
-    root_cert = OpenSSL::X509::Certificate.new
-    root_cert.subject = root_cert.issuer = OpenSSL::X509::Name.parse(root_subject)
-    root_cert.not_before = Time.now
-    root_cert.not_after = Time.now + 10.years
-    root_cert.public_key = root_key.public_key
-    root_cert.serial = 0x0
-    root_cert.version = 2
-    root_cert.add_extension(ef.create_extension("basicConstraints","CA:FALSE",true))
-    root_cert.add_extension(ef.create_extension("keyUsage","keyCertSign, cRLSign", true))
+    issuing_cert = OpenSSL::X509::Certificate.new
+    issuing_cert.subject = issuing_cert.issuer = OpenSSL::X509::Name.parse(issuer_subject)
+    issuing_cert.not_before = Time.now
+    issuing_cert.not_after = Time.now + 10.years
+    issuing_cert.public_key = issuing_key.public_key
+    issuing_cert.serial = 0x0
+    issuing_cert.version = 2
+    issuing_cert.add_extension(ef.create_extension("basicConstraints","CA:FALSE",true))
+    issuing_cert.add_extension(ef.create_extension("keyUsage","keyCertSign, cRLSign", true))
 
-    root_cert.sign(root_key, OpenSSL::Digest.new("SHA256"))
+    issuing_cert.sign(issuing_key, OpenSSL::Digest.new("SHA256"))
 
-    leaf_cert = OpenSSL::X509::Certificate.new
-    leaf_cert.issuer = OpenSSL::X509::Name.parse(root_subject)
-    leaf_cert.not_before = not_before
-    leaf_cert.not_after = not_before + 10.minutes
-    leaf_cert.public_key = public_signing_key
-    leaf_cert.serial = 0x0
-    leaf_cert.version = 2
-    leaf_cert.add_extension(ef.create_extension("basicConstraints","CA:TRUE",true))
-    leaf_cert.add_extension(ef.create_extension("keyUsage","digitalSignature", true))
-    leaf_cert.add_extension(ef.create_extension("extendedKeyUsage","codeSigning", true))
-    leaf_cert.add_extension(ef.create_extension("authorityInfoAccess","caIssuers;URI:http://some-ca-authority.org/ca.crt", true))
-    leaf_cert.add_extension(ef.create_extension("subjectAltName","email:someone@example.org", true))
-    leaf_cert.sign(root_key, OpenSSL::Digest.new("SHA256"))
+    options = default_signing_cert_options.merge(signing_cert_options)
 
-    [root_cert, leaf_cert].map(&:to_pem)
+    signing_cert = OpenSSL::X509::Certificate.new
+    signing_cert.issuer = OpenSSL::X509::Name.parse(issuer_subject)
+    signing_cert.not_before = options[:not_before]
+    signing_cert.not_after = options[:not_before] + 10.minutes
+    signing_cert.public_key = public_signing_key
+    signing_cert.serial = 0x0
+    signing_cert.version = 2
+    signing_cert.add_extension(ef.create_extension("basicConstraints","CA:TRUE",true))
+    signing_cert.add_extension(ef.create_extension("keyUsage","digitalSignature", true))
+    signing_cert.add_extension(ef.create_extension("extendedKeyUsage","codeSigning", true))
+    signing_cert.add_extension(ef.create_extension("authorityInfoAccess","caIssuers;URI:#{FULCIO_FAKE_CA_BASE_URL}/ca.crt", true))
+    signing_cert.add_extension(ef.create_extension("subjectAltName","email:#{options[:email]}", true))
+    signing_cert.sign(issuing_key, OpenSSL::Digest.new("SHA256"))
+
+    [issuing_cert, signing_cert].map(&:to_pem)
+  end
+
+  def default_signing_cert_options
+    {
+      not_before: Time.now,
+      email: "someone@example.org",
+    }
   end
 
   def signing_cert_key(request)

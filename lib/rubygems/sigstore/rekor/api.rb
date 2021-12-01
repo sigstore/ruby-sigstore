@@ -42,13 +42,14 @@ class Gem::Sigstore::Rekor::Api
       raise "Unexpected response from POST /api/v1/index/retrieve:\n #{retrieve_response}"
     end
 
-    retrieve_response.body.map do |uuid|
-      entry_response = connection.get("api/v1/log/entries/#{uuid}")
-      unless entry_response.status == 200
-        raise "Unexpected response from GET api/v1/log/entries/#{uuid}:\n #{entry_response}"
-      end
+    retrieve_response = connection.post("api/v1/log/entries/retrieve", entryUUIDs: retrieve_response.body)
 
-      Gem::Sigstore::Rekor::LogEntry.from(entry_response.body)
+    unless retrieve_response.status == 200
+      raise "Unexpected response from POST api/v1/log/entries/retrieve:\n #{entry_response}"
+    end
+
+    retrieve_response.body.reduce(:merge).map do |uuid, entry|
+      Gem::Sigstore::Rekor::LogEntry.from(uuid, entry)
     end
   end
 
