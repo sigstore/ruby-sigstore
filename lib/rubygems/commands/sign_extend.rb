@@ -27,6 +27,11 @@ b.add_option("--sign", "Sign gem with sigstore.") do |value, options|
   Gem::Sigstore.options[:sign] = true
 end
 
+b.add_option("--identity-token", String,
+             "Provide a static token for automated environments") do |value, options|
+  Gem::Sigstore.options[:identity_token] = value
+end
+
 class Gem::Commands::BuildCommand
   alias_method :original_execute, :execute
   def execute
@@ -34,7 +39,8 @@ class Gem::Commands::BuildCommand
       gemfile = Gem::Sigstore::Gemfile.new(get_one_gem_name)
       gem_signer = Gem::Sigstore::GemSigner.new(
         gemfile: gemfile,
-        config: Gem::Sigstore::Config.read
+        config: Gem::Sigstore::Config.read,
+        identity_token: Gem::Sigstore.options[:identity_token],
       )
       # Run the gem build process only if openid auth was successful (original_execute)
       rekor_entry = gem_signer.run { original_execute }

@@ -6,3 +6,4 @@ module Gem
 end
 
 require "rubygems/sigstore/openid/dynamic"
+require "rubygems/sigstore/openid/static"

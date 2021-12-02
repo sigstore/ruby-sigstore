@@ -9,9 +9,10 @@ class Gem::Sigstore::GemSigner
 
   Data = Struct.new(:digest, :signature, :raw)
 
-  def initialize(gemfile:, config:)
+  def initialize(gemfile:, config:, identity_token: nil)
     @gemfile = gemfile
     @config = config
+    @identity_token = identity_token
   end
 
   def run
@@ -29,7 +30,7 @@ class Gem::Sigstore::GemSigner
 
   private
 
-  attr_reader :gemfile, :config
+  attr_reader :gemfile, :config, :identity_token
 
   def cert_provider
     Gem::Sigstore::CertProvider.new(config: config, pkey: pkey, oidp: oidp)
@@ -40,7 +41,11 @@ class Gem::Sigstore::GemSigner
   end
 
   def oidp
-    @oidp ||= Gem::Sigstore::OpenID::Dynamic.new(pkey.private_key)
+    @oidp ||= if identity_token
+                Gem::Sigstore::OpenID::Static.new(pkey.private_key, identity_token)
+              else
+                Gem::Sigstore::OpenID::Dynamic.new(pkey.private_key)
+              end
   end
 
   def gemfile_signer(cert)
