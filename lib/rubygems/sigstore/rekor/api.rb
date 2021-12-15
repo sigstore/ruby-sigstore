@@ -32,23 +32,11 @@ class Gem::Sigstore::Rekor::Api
   end
 
   def where(data_digest:)
-    retrieve_response = connection.post("/api/v1/index/retrieve",
-      {
-        hash: "sha256:#{data_digest}",
-      }
-    )
+    log_entry_uuids = find_log_entry_uuids_by_digest(data_digest)
 
-    unless retrieve_response.status == 200
-      raise "Unexpected response from POST /api/v1/index/retrieve:\n #{retrieve_response}"
-    end
+    return [] if log_entry_uuids.empty?
 
-    retrieve_response = connection.post("api/v1/log/entries/retrieve", entryUUIDs: retrieve_response.body)
-
-    unless retrieve_response.status == 200
-      raise "Unexpected response from POST api/v1/log/entries/retrieve:\n #{entry_response}"
-    end
-
-    retrieve_response.body.reduce(:merge).map do |uuid, entry|
+    find_log_entries_by_uuid(log_entry_uuids).reduce({}, :merge).map do |uuid, entry|
       Gem::Sigstore::Rekor::LogEntry.from(uuid, entry)
     end
   end
@@ -64,5 +52,29 @@ class Gem::Sigstore::Rekor::Api
       request.response :json, content_type: /json/
       request.adapter :net_http
     end
+  end
+
+  def find_log_entry_uuids_by_digest(digest)
+    index_response = connection.post("/api/v1/index/retrieve",
+      {
+        hash: "sha256:#{digest}",
+      }
+    )
+
+    unless index_response.status == 200
+      raise "Unexpected response from POST /api/v1/index/retrieve:\n #{index_response}"
+    end
+
+    index_response.body
+  end
+
+  def find_log_entries_by_uuid(uuids)
+    log_entries_response = connection.post("api/v1/log/entries/retrieve", entryUUIDs: uuids)
+
+    unless log_entries_response.status == 200
+      raise "Unexpected response from POST api/v1/log/entries/retrieve:\n #{entry_response}"
+    end
+
+    log_entries_response.body
   end
 end
