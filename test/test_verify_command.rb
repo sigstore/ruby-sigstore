@@ -14,6 +14,20 @@ class TestVerifyCommand < Gem::TestCase
     stub_rekor_get_rekords_by_uuid
   end
 
+  def test_unsigned_gem
+    @cmd.options[:args] = [@gem_path]
+    stub_rekor_search_index_by_digest(returning: [])
+
+    use_ui @ui do
+      @cmd.execute
+    end
+
+    output = @ui.output.split "\n"
+    assert_equal "Verifying #{@gem_path}", output.shift
+    assert_match /No valid signatures found for digest/, output.shift
+    assert_equal [], output
+  end
+
   def test_one_non_maintainer_signature
     @cmd.options[:args] = [@gem_path]
 
