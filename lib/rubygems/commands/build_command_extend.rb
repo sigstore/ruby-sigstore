@@ -19,11 +19,9 @@ require 'rubygems/package'
 require 'rubygems/command_manager'
 require 'rubygems/sigstore'
 
-Gem::CommandManager.instance.register_command :sign
-
-# overde the generic gem build command to lay are own --sign option on top
+# override the generic gem build command to lay our own --sign option on top
 b = Gem::CommandManager.instance[:build]
-b.add_option("--sign", "Sign gem with sigstore.") do |value, options|
+b.add_option("--[no-]sign", "Sign gem with sigstore.") do |value, options|
   Gem::Sigstore.options[:sign] = true
 end
 
@@ -44,7 +42,7 @@ class Gem::Commands::BuildCommand
       )
       # Run the gem build process only if openid auth was successful (original_execute)
       rekor_entry = gem_signer.run { original_execute }
-      pp rekor_entry
+      say rekor_entry
     end
   end
 end
