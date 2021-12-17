@@ -27,10 +27,25 @@ end
 
 Gem.pre_install do |installer|
   begin
-    if (Gem::Sigstore.options[:verify])
-      puts "verify called"
+    verify = Gem::Sigstore.options[:verify] || Gem::SigningPolicy.verify_gem_install?
+    if verify
+      # A locally installed gem will sometimes not have a reference to the .gem file
+      if (package = installer.package)
+        gem_path = package.gem.path
+
+        say "Verifying #{gem_path}"
+
+        raise Gem::CommandLineError, "#{gem_path} is not a file" unless File.file?(gem_path)
+
+        gemfile = Gem::Sigstore::Gemfile.new(gem_path)
+        verifier = Gem::Sigstore::GemVerifier.new(
+          gemfile: gemfile,
+          config: Gem::Sigstore::Config.read
+        )
+        verifier.run
+      end
     end
-  rescue Gem::SigstoreException => ex
+  rescue StandardError => ex
     installer.alert_error(ex.message)
     installer.terminate_interaction(1)
   end
