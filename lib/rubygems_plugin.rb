@@ -15,15 +15,11 @@
 require 'rubygems/command_manager'
 require 'rubygems/sigstore'
 require 'rubygems/commands/signatures_command'
-require 'rubygems/commands/sign_command'
-require 'rubygems/commands/sign_extend'
-require 'rubygems/commands/verify_command'
-require 'rubygems/commands/verify_extend'
+require 'rubygems/commands/build_command_extend'
+require 'rubygems/commands/install_command_extend'
 
 Gem::CommandManager.instance.register_command :signatures
-Gem::CommandManager.instance.register_command :sign
-Gem::CommandManager.instance.register_command :verify
 
-[:signatures, :sign, :verify, :build, :install].each do |cmd_name|
+[:signatures, :build, :install].each do |cmd_name|
   cmd = Gem::CommandManager.instance[cmd_name]
 end

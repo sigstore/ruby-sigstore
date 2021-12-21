@@ -13,9 +13,8 @@
 # limitations under the License.
 
 require 'rubygems/command_manager'
+require "rubygems/user_interaction"
 require 'rubygems/sigstore'
-
-Gem::CommandManager.instance.register_command :verify
 
 # gem install hooks
 i = Gem::CommandManager.instance[:install]
@@ -33,7 +32,7 @@ Gem.pre_install do |installer|
       if (package = installer.package)
         gem_path = package.gem.path
 
-        say "Verifying #{gem_path}"
+        installer.say "Verifying #{gem_path}"
 
         raise Gem::CommandLineError, "#{gem_path} is not a file" unless File.file?(gem_path)
 
