@@ -47,7 +47,7 @@ $ gem signatures --sign --identity-token=$(gcloud auth print-identity-token)
 
 ### Install and verify a gem
 
-`gem install foo --verify`
+`gem install foo --verify-signatures`
 
 ## Development
 
