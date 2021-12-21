@@ -18,7 +18,7 @@ require 'rubygems/sigstore'
 
 # gem install hooks
 i = Gem::CommandManager.instance[:install]
-i.add_option("--[no-]verify",
+i.add_option("--[no-]verify-signatures",
              'Verifies a local gem has been signed via sigstore.' +
              'This helps to ensure the gem has not been tampered with in transit.') do |value, options|
   Gem::Sigstore.options[:verify] = value
