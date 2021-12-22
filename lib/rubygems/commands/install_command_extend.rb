@@ -34,8 +34,6 @@ Gem.pre_install do |installer|
 
         installer.say "Verifying #{gem_path}"
 
-        raise Gem::CommandLineError, "#{gem_path} is not a file" unless File.file?(gem_path)
-
         gemfile = Gem::Sigstore::Gemfile.new(gem_path)
         verifier = Gem::Sigstore::GemVerifier.new(
           gemfile: gemfile,
