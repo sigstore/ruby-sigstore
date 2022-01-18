@@ -8,6 +8,7 @@ gem "oa-openid", "~> 0.0.2"
 gem "omniauth-openid", "~> 2.0.1"
 gem "ruby-openid-apps-discovery", "~> 1.2.0"
 gem "json-jwt", "~> 1.13.0"
+gem 'net-smtp', require: false
 
 group :development do
   gem "rubocop", "~> 0.80.1"
