@@ -156,6 +156,18 @@ class TestSignaturesCommand < Gem::TestCase
     end
   end
 
+  def test_rejects_files_that_are_not_gems
+    @cmd.handle_options %W[./test/fixtures/not_a_gem]
+
+    use_ui @ui do
+      e = assert_raise Gem::CommandLineError do
+        @cmd.execute
+      end
+
+      assert_equal "./test/fixtures/not_a_gem is not a valid gem", e.message
+    end
+  end
+
   def assert_certificate(output)
     assert_equal "-----BEGIN CERTIFICATE-----", output.shift
     assert_match BASE64_ENCODED_PATTERN, output.shift until output.first == "-----END CERTIFICATE-----"

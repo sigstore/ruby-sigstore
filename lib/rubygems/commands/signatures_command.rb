@@ -55,6 +55,7 @@ class Gem::Commands::SignaturesCommand < Gem::Command
   def execute
     gem_path = get_one_gem_name
     raise Gem::CommandLineError, "#{gem_path} is not a file" unless File.file?(gem_path)
+    raise Gem::CommandLineError, "#{gem_path} is not a valid gem" unless is_a_gem?(gem_path)
 
     gemfile = Gem::Sigstore::Gemfile.new(gem_path)
 
@@ -63,6 +64,14 @@ class Gem::Commands::SignaturesCommand < Gem::Command
   end
 
   private
+
+  def is_a_gem?(file)
+    begin
+      Gem::Package.new(file).verify
+    rescue Gem::Package::FormatError
+      return false
+    end
+  end
 
   def sign(gemfile)
     rekor_entry = Gem::Sigstore::GemSigner.new(
