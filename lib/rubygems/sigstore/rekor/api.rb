@@ -72,7 +72,7 @@ class Gem::Sigstore::Rekor::Api
     log_entries_response = connection.post("api/v1/log/entries/retrieve", entryUUIDs: uuids)
 
     unless log_entries_response.status == 200
-      raise "Unexpected response from POST api/v1/log/entries/retrieve:\n #{entry_response}"
+      raise "Unexpected response from POST api/v1/log/entries/retrieve:\n #{log_entries_response}"
     end
 
     log_entries_response.body
