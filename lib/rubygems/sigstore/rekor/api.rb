@@ -8,7 +8,7 @@ class Gem::Sigstore::Rekor::Api
   end
 
   def create(cert_chain, data)
-    connection.post("/api/v1/log/entries",
+    response = connection.post("/api/v1/log/entries",
       {
         kind: "rekord",
         apiVersion: "0.0.1",
@@ -28,7 +28,14 @@ class Gem::Sigstore::Rekor::Api
             },
           },
         },
-      }).body
+      }
+    )
+
+    unless response.status == 201
+      raise "Unexpected response from POST api/v1/log/entries:\n #{response.body}"
+    end
+
+    response.body
   end
 
   def where(data_digest:)

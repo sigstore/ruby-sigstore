@@ -8,13 +8,20 @@ class Gem::Sigstore::FulcioApi
   end
 
   def create(pub_key)
-    connection.post("/api/v1/signingCert", {
+    response = connection.post("/api/v1/signingCert", {
       publicKey: {
         content: Base64.encode64(pub_key),
         algorithm: "ecdsa",
       },
-      signedEmailAddress: Base64.encode64(oidp.proof),
-    }).body
+        signedEmailAddress: Base64.encode64(oidp.proof),
+    }
+    )
+
+    unless response.status == 201
+      raise "Unexpected response from POST api/v1/signingCert:\n #{response.body}"
+    end
+
+    response.body
   end
 
   private
