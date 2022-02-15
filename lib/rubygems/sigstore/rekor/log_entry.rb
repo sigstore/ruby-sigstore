@@ -3,6 +3,8 @@ class Gem::Sigstore::Rekor::LogEntry
     body = encoded_body_to_hash(entry["body"])
 
     case body["kind"]
+    when "hashedrekord"
+      Gem::Sigstore::Rekor::HashedRekord.new(uuid, entry)
     when "rekord"
       Gem::Sigstore::Rekor::Rekord.new(uuid, entry)
     else
