@@ -25,7 +25,7 @@ module RekorHelper
         },
         body: hash_including(
           {
-            kind: "rekord",
+            kind: "hashedrekord",
             apiVersion: "0.0.1",
             spec: hash_including({
               signature: hash_including({
@@ -36,7 +36,6 @@ module RekorHelper
                 }),
               }),
               data: hash_including({
-                content: BASE64_ENCODED_PATTERN,
                 hash: hash_including({
                   algorithm: "sha256",
                   value: gem.digest,

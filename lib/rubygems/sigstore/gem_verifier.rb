@@ -14,7 +14,7 @@ class Gem::Sigstore::GemVerifier
   def run
     rekor_api = Gem::Sigstore::Rekor::Api.new(host: config.rekor_host)
     log_entries = rekor_api.where(data_digest: gemfile.digest)
-    rekords = log_entries.select {|entry| entry.kind == :rekord }
+    rekords = log_entries.select {|entry| %i[rekord hashedrekord].include?(entry.kind) }
 
     valid_signature_rekords = rekords.select {|rekord| valid_signature?(rekord, gemfile) }
 
