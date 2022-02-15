@@ -10,7 +10,7 @@ class Gem::Sigstore::Rekor::Api
   def create(cert_chain, data)
     connection.post("/api/v1/log/entries",
       {
-        kind: "rekord",
+        kind: "hashedrekord",
         apiVersion: "0.0.1",
         spec: {
           signature: {
@@ -21,7 +21,6 @@ class Gem::Sigstore::Rekor::Api
             },
           },
           data: {
-            content: Base64.encode64(data.raw),
             hash: {
               algorithm: "sha256",
               value: data.digest,
