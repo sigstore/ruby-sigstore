@@ -3,7 +3,7 @@
 > :warning: Still under developement, not ready for production use yet!
 
 This rubygems plugin enables both developers to sign gem files and users to verify the origin
-of a gem. It wraps around the main gem command to allow a level of seamless intergration with
+of a gem. It wraps around the main gem command to allow a level of seamless integration with
 gem build and install operations.
 
 ## Installation
